@@ -110,7 +110,7 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
 .note-cell{display:flex;flex-direction:column;align-items:center;min-width:30px;padding:0 3px;cursor:pointer;border-radius:3px;position:relative;user-select:none}
 .nc-inner{display:flex;flex-direction:column;align-items:center;padding:2px 3px;width:100%;border-radius:3px;transition:background .1s}
 .note-cell:hover .nc-inner{background:rgba(192,57,43,.08)}
-.note-cell.sel .nc-inner{background:rgba(192,57,43,.18)}
+.note-cell.sel .nc-inner{background:rgba(192,57,43,.28);outline:2px solid var(--accent);outline-offset:1px;border-radius:3px}
 .note-cell.cursor-before::before{content:'';position:absolute;left:-2px;top:8px;bottom:4px;width:2px;background:var(--cursor-clr);border-radius:1px;animation:blink .9s steps(1) infinite;z-index:10}
 .cursor-end-beam{width:3px;min-width:3px;align-self:stretch;position:relative;margin-left:2px;margin-right:4px}
 .cursor-end-beam::before{content:'';position:absolute;left:0;top:8px;bottom:4px;width:2px;background:var(--cursor-clr);border-radius:1px;animation:blink .9s steps(1) infinite}
@@ -170,14 +170,23 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
 .btn.fav-filter-on:hover{background:#c0392b}
 .plaza-empty{grid-column:1/-1;text-align:center;padding:60px;color:var(--ink3);font-size:14px;line-height:2}
 
-/* Score preview modal */
-.preview-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+/* ── Score Preview Modal (larger) ── */
+.preview-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .preview-overlay.show{opacity:1;pointer-events:all}
-.preview-modal{background:#fff;border-radius:12px;width:90%;max-width:680px;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 12px 48px rgba(0,0,0,.2)}
-.preview-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.preview-title{font-size:16px;font-weight:700;flex:1}
-.preview-body{flex:1;overflow-y:auto;padding:20px 28px}
-.preview-actions{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.preview-modal{background:#fff;border-radius:12px;width:96%;max-width:860px;height:88vh;display:flex;flex-direction:column;box-shadow:0 12px 48px rgba(0,0,0,.25)}
+.preview-header{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.preview-title{font-size:16px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.preview-body{flex:1;overflow-y:auto;padding:20px 32px}
+.preview-actions{padding:12px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0}
+
+/* Share link modal */
+.share-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:250;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.share-modal-overlay.show{opacity:1;pointer-events:all}
+.share-modal{background:#fff;border-radius:12px;padding:28px 32px;width:90%;max-width:480px;box-shadow:0 8px 40px rgba(0,0,0,.18)}
+.share-modal-title{font-size:16px;font-weight:700;margin-bottom:16px}
+.share-link-box{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.share-link-input{flex:1;border:1px solid var(--border);border-radius:6px;padding:9px 12px;font-size:12px;font-family:'DM Mono',monospace;color:var(--ink2);background:var(--paper2);outline:none}
+.share-modal-note{font-size:12px;color:var(--ink3);line-height:1.7}
 
 /* ── Confirm Modal ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -200,6 +209,21 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
 /* Loading spinner */
 .spinner{width:18px;height:18px;border:2px solid #ddd;border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Print styles ── */
+@media print {
+  body{overflow:visible;height:auto;background:#fff}
+  .app{height:auto;overflow:visible}
+  .header,.library,.toolbar,.statusbar,#toolbar{display:none!important}
+  .view.active{display:block!important;overflow:visible}
+  .editor-main{overflow:visible}
+  .score-view{overflow:visible;padding:0}
+  .score-paper{border:none;box-shadow:none;padding:16px 0}
+  .score-title-input,.score-comp-input{pointer-events:none}
+  .staff-line{page-break-inside:avoid;overflow:visible}
+  .note-cell.cursor-before::before{display:none}
+  .cursor-end-beam{display:none}
+}
 </style>
 </head>
 <body>
@@ -212,6 +236,8 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
     <div class="nav-tab" onclick="switchView('plaza')" id="navPlaza">乐谱广场</div>
     <div class="header-right">
       <span class="save-st" id="saveSt"></span>
+      <button class="btn" onclick="printScore()" id="printBtn" style="display:none" title="打印乐谱">🖨 打印</button>
+      <button class="btn" onclick="openShareModal()" id="shareLinkBtn" style="display:none" title="生成分享链接">🔗 链接</button>
       <button class="btn save-btn" id="headerSaveBtn" onclick="saveScore()" style="display:none">保存</button>
       <div class="user-chip" id="userChip">
         <div class="user-avatar" id="userAvatar">?</div>
@@ -237,7 +263,8 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
         </div>
         <div class="form-group">
           <label class="form-label">密码</label>
-          <input class="form-input" type="password" id="loginPwd" placeholder="••••••••" onkeydown="if(e.key==='Enter')doLogin()">
+          <!-- FIX: 原来 onkeydown 里用了未定义的 e，改为 event -->
+          <input class="form-input" type="password" id="loginPwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
         </div>
         <button class="form-btn" onclick="doLogin()" id="loginBtn">登录</button>
         <div class="auth-msg" id="loginMsg"></div>
@@ -313,6 +340,8 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
             <button class="kbtn bar" onclick="insBar()">|</button>
             <button class="kbtn newline" onclick="insLineBreak()" title="换行">↵</button>
             <div class="divider"></div>
+            <button class="btn" onclick="copySelection()" title="复制选中音符 (Ctrl+C)">复制</button>
+            <button class="btn" onclick="pasteNotes()" title="粘贴 (Ctrl+V)">粘贴</button>
             <button class="btn" onclick="delSel()" style="color:#c0392b">⌫ 删除</button>
           </div>
           <div class="tb-row">
@@ -333,7 +362,7 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
       </div>
       <div class="statusbar">
         <span id="statusMsg">选择左侧乐谱，或新建</span>
-        <span style="margin-left:auto">← → 移动光标 · 1-7 音符 · Del 删除 · Space 播放 · Ctrl+S 保存</span>
+        <span style="margin-left:auto">← → 移动 · 1-7 音符 · Shift+点击 多选 · Ctrl+C/V 复制粘贴 · Del 删除 · Space 播放 · Ctrl+S 保存</span>
       </div>
     </div>
   </div>
@@ -372,6 +401,23 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
   </div>
 </div>
 
+<!-- Share Link Modal -->
+<div class="share-modal-overlay" id="shareModalOverlay" onclick="if(event.target===this)closeShareModal()">
+  <div class="share-modal">
+    <div class="share-modal-title">🔗 分享乐谱链接</div>
+    <div id="shareModalBody">
+      <div class="share-link-box">
+        <input class="share-link-input" id="shareLinkInput" readonly>
+        <button class="btn primary" onclick="copyShareLink()">复制</button>
+      </div>
+      <div class="share-modal-note" id="shareModalNote"></div>
+    </div>
+    <div style="margin-top:16px;display:flex;justify-content:flex-end">
+      <button class="btn" onclick="closeShareModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
 <!-- Confirm Modal -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
@@ -388,7 +434,7 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
 
 <script>
 // ══════════════════════════════════════════════
-// CONFIG — replace with your Supabase project values
+// CONFIG
 // ══════════════════════════════════════════════
 const SUPABASE_URL = 'https://ywahjuecnjjzhrkuidbj.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_Ob6coi6A0K0845oZWJGD9g_2uq8FuB3';
@@ -417,12 +463,38 @@ let plazaScores=[];
 let favFilterOn=false;
 let searchTimer=null;
 
+// Selection state: array of {m, n} positions
+let selection = [];
+let selAnchor = null; // for shift-click range
+
+// Clipboard
+let clipboard = [];
+
+// Auto-save
+let autoSaveTimer = null;
+const AUTO_SAVE_DELAY = 3000; // 3 seconds after last edit
+
 // ══════════════════════════════════════════════
 // Auth
 // ══════════════════════════════════════════════
 async function initAuth() {
+  // Check URL for shared score
+  const urlParams = new URLSearchParams(window.location.search);
+  const sharedId = urlParams.get('score');
+
   const { data: { session } } = await sb.auth.getSession();
-  if (session?.user) await onSignedIn(session.user);
+  if (session?.user) {
+    await onSignedIn(session.user);
+    // If there's a shared score in URL, open plaza and preview it
+    if (sharedId) {
+      switchView('plaza');
+      await loadPlaza();
+      setTimeout(() => openPreviewById(sharedId), 500);
+    }
+  } else if (sharedId) {
+    // Not logged in but has shared link — show plaza preview after login
+    sessionStorage.setItem('pendingSharedScore', sharedId);
+  }
 }
 
 async function onSignedIn(user) {
@@ -437,6 +509,15 @@ async function onSignedIn(user) {
   switchView('editor');
   await loadMyScores();
   await loadMyFavs();
+
+  // Handle pending shared score from before login
+  const pending = sessionStorage.getItem('pendingSharedScore');
+  if (pending) {
+    sessionStorage.removeItem('pendingSharedScore');
+    switchView('plaza');
+    await loadPlaza();
+    setTimeout(() => openPreviewById(pending), 500);
+  }
 }
 
 async function doLogin() {
@@ -465,7 +546,6 @@ async function doRegister() {
   const { data, error } = await sb.auth.signUp({email, password:pwd});
   btn.disabled=false; btn.textContent='创建账号';
   if (error) { showAuthMsg(msg, error.message, 'err'); return; }
-  // update nickname
   if (nick && data.user) {
     await sb.from('profiles').update({nickname:nick}).eq('id', data.user.id);
   }
@@ -473,6 +553,7 @@ async function doRegister() {
 }
 
 async function signOut() {
+  stopAutoSave();
   await sb.auth.signOut();
   currentUser=null; score=null; activeId=null; myScores=[];
   document.getElementById('mainHeader').style.display='none';
@@ -502,6 +583,8 @@ function switchView(v) {
   document.getElementById('navEditor').classList.toggle('active', v==='editor');
   document.getElementById('navPlaza').classList.toggle('active', v==='plaza');
   document.getElementById('headerSaveBtn').style.display = v==='editor'?'':'none';
+  document.getElementById('printBtn').style.display = v==='editor'&&score?'':'none';
+  document.getElementById('shareLinkBtn').style.display = v==='editor'&&score?'':'none';
   if (v==='plaza') loadPlaza();
 }
 
@@ -555,10 +638,11 @@ function openScore(id) {
   if (!s) return;
   activeId = id;
   score = JSON.parse(JSON.stringify(s));
-  // normalize time_sig field name
   if (score.time_sig && !score.timeSig) score.timeSig = score.time_sig;
-  cursor={m:0,n:0}; dirty=false;
+  cursor={m:0,n:0}; dirty=false; selection=[]; selAnchor=null;
   document.getElementById('toolbar').style.display='';
+  document.getElementById('printBtn').style.display='';
+  document.getElementById('shareLinkBtn').style.display='';
   document.getElementById('keySelect').value=score.key;
   document.getElementById('timeSig').value=score.timeSig||score.time_sig||'4/4';
   document.getElementById('tempoSlider').value=score.tempo;
@@ -572,6 +656,7 @@ function openScore(id) {
 
 async function saveScore() {
   if (!score||!currentUser) return;
+  stopAutoSave();
   score.updated_at = new Date().toISOString();
   const payload = {title:score.title, composer:score.composer, key:score.key,
     time_sig:score.timeSig||score.time_sig, tempo:score.tempo, measures:score.measures,
@@ -610,14 +695,37 @@ async function confirmDelete() {
   if (activeId===id) {
     activeId=null; score=null; dirty=false;
     document.getElementById('toolbar').style.display='none';
+    document.getElementById('printBtn').style.display='none';
+    document.getElementById('shareLinkBtn').style.display='none';
     document.getElementById('scoreContent').innerHTML='<div class="no-score"><div class="no-score-icon">♪</div><div style="font-size:14px">选择左侧乐谱，或点「+ 新建」</div></div>';
   }
   renderLib(); toast('已删除');
 }
 
 // ══════════════════════════════════════════════
+// Auto-save
+// ══════════════════════════════════════════════
+function scheduleAutoSave() {
+  stopAutoSave();
+  autoSaveTimer = setTimeout(async () => {
+    if (dirty && score && currentUser) {
+      setSaveSt('自动保存中…');
+      await saveScore();
+    }
+  }, AUTO_SAVE_DELAY);
+}
+
+function stopAutoSave() {
+  if (autoSaveTimer) { clearTimeout(autoSaveTimer); autoSaveTimer = null; }
+}
+
+// ══════════════════════════════════════════════
 // Score Render
 // ══════════════════════════════════════════════
+function isSelected(mi, ni) {
+  return selection.some(s => s.m === mi && s.n === ni);
+}
+
 function renderScore() {
   if (!score) return;
   const c = document.getElementById('scoreContent');
@@ -653,7 +761,7 @@ function renderScore() {
           if(isCur&&cursor.n===0) html+='<span class="cursor-end-beam"></span>';
           html+='<span class="empty-m">空</span>';
         } else {
-          m.notes.forEach((n,ni)=>{ html+=renderNote(n,mi,ni,isCur&&cursor.n===ni); });
+          m.notes.forEach((n,ni)=>{ html+=renderNote(n,mi,ni,isCur&&cursor.n===ni,isSelected(mi,ni)); });
           if(isCur&&cursor.n===m.notes.length) html+='<span class="cursor-end-beam"></span>';
         }
         html+=`</div></div>`;
@@ -668,9 +776,16 @@ function renderScore() {
     });
   }
   c.innerHTML=html;
+  updateSelectionStatus();
 }
 
-function renderNote(n,mi,ni,cursorBefore){
+function updateSelectionStatus() {
+  if (selection.length > 0) {
+    setStatus(`已选中 ${selection.length} 个音符 · Ctrl+C 复制 · Del 删除选中`);
+  }
+}
+
+function renderNote(n,mi,ni,cursorBefore,selected){
   const acc=n.acc===1?'#':n.acc===-1?'b':'';
   const isRest=n.num==='0';
   let tD='',bD='';
@@ -679,7 +794,7 @@ function renderNote(n,mi,ni,cursorBefore){
   let ul='';
   if(n.dur==='e')ul='<div class="nul"></div>';
   if(n.dur==='s')ul='<div class="nul"></div><div class="nul"></div>';
-  return `<div class="note-cell${cursorBefore?' cursor-before':''}" onclick="clickNote(event,${mi},${ni})">
+  return `<div class="note-cell${cursorBefore?' cursor-before':''}${selected?' sel':''}" onclick="clickNote(event,${mi},${ni})">
     ${n.tie?'<span class="tiemark">⌢</span>':''}
     <div class="nc-inner">
       <div class="ndots-t">${tD}</div>
@@ -695,11 +810,57 @@ function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').repla
 // ══════════════════════════════════════════════
 // Edit ops
 // ══════════════════════════════════════════════
-function clickNote(e,mi,ni){e.stopPropagation();const rect=e.currentTarget.getBoundingClientRect();moveCursorTo(mi,e.clientX<rect.left+rect.width/2?ni:ni+1);}
-function clickMeasure(mi,e){if(e.target.classList.contains('note-cell')||e.target.closest('.note-cell'))return;moveCursorTo(mi,score.measures[mi].notes.length);}
+function clickNote(e, mi, ni) {
+  e.stopPropagation();
+  const rect = e.currentTarget.getBoundingClientRect();
+  const newPos = e.clientX < rect.left + rect.width / 2 ? ni : ni + 1;
+
+  if (e.shiftKey && selAnchor !== null) {
+    // Shift-click: range selection from anchor to current note
+    const anchor = selAnchor;
+    selection = [];
+    // Flatten all notes
+    const flat = [];
+    score.measures.forEach((m, mIdx) => m.notes.forEach((n, nIdx) => flat.push({m:mIdx, n:nIdx})));
+    const anchorFlat = flat.findIndex(p => p.m === anchor.m && p.n === anchor.n);
+    const curFlat = flat.findIndex(p => p.m === mi && p.n === ni);
+    if (anchorFlat >= 0 && curFlat >= 0) {
+      const lo = Math.min(anchorFlat, curFlat);
+      const hi = Math.max(anchorFlat, curFlat);
+      selection = flat.slice(lo, hi + 1);
+    }
+  } else if (e.ctrlKey || e.metaKey) {
+    // Ctrl-click: toggle individual note
+    const idx = selection.findIndex(s => s.m === mi && s.n === ni);
+    if (idx >= 0) selection.splice(idx, 1);
+    else { selection.push({m:mi, n:ni}); selAnchor = {m:mi, n:ni}; }
+  } else {
+    // Normal click: move cursor, clear selection
+    selection = [];
+    selAnchor = {m:mi, n:ni};
+    moveCursorTo(mi, newPos);
+    return;
+  }
+  renderScore();
+}
+
+function clickMeasure(mi,e){
+  if(e.target.classList.contains('note-cell')||e.target.closest('.note-cell'))return;
+  selection=[];selAnchor=null;
+  moveCursorTo(mi,score.measures[mi].notes.length);
+}
 function moveCursorTo(mi,ni){cursor.m=mi;cursor.n=ni;renderScore();}
-function ins(num){if(!score)return;score.measures[cursor.m].notes.splice(cursor.n,0,{num,dur:curDur,octave:curOct,aug:curAug,tie:false,acc:curAcc});cursor.n++;markDirty();renderScore();}
+
+function ins(num){
+  if(!score)return;
+  selection=[];
+  score.measures[cursor.m].notes.splice(cursor.n,0,{num,dur:curDur,octave:curOct,aug:curAug,tie:false,acc:curAcc});
+  cursor.n++;
+  markDirty();renderScore();
+}
+
 function insBar(){if(!score)return;const m=score.measures[cursor.m];const after=m.notes.splice(cursor.n);const lb=m.linebreak;m.linebreak=false;score.measures.splice(cursor.m+1,0,{notes:after,linebreak:lb});cursor.m++;cursor.n=0;markDirty();renderScore();}
+
 function insLineBreak(){
   if(!score)return;
   const m=score.measures[cursor.m];
@@ -712,9 +873,36 @@ function insLineBreak(){
   }
   markDirty();renderScore();
 }
+
 function removeLinebreak(mi){if(!score)return;score.measures[mi].linebreak=false;markDirty();renderScore();}
-function delSel(){if(!score)return;const m=score.measures[cursor.m];if(cursor.n>0){m.notes.splice(cursor.n-1,1);cursor.n--;markDirty();renderScore();}else if(cursor.m>0){const prev=score.measures[cursor.m-1];const pos=prev.notes.length;prev.notes=prev.notes.concat(m.notes);prev.linebreak=m.linebreak;score.measures.splice(cursor.m,1);cursor.m--;cursor.n=pos;markDirty();renderScore();}}
+
+function delSel(){
+  if(!score)return;
+  // If there's a multi-selection, delete all selected notes
+  if(selection.length>0){
+    deleteSelectedNotes();
+    return;
+  }
+  const m=score.measures[cursor.m];
+  if(cursor.n>0){m.notes.splice(cursor.n-1,1);cursor.n--;markDirty();renderScore();}
+  else if(cursor.m>0){const prev=score.measures[cursor.m-1];const pos=prev.notes.length;prev.notes=prev.notes.concat(m.notes);prev.linebreak=m.linebreak;score.measures.splice(cursor.m,1);cursor.m--;cursor.n=pos;markDirty();renderScore();}
+}
+
+function deleteSelectedNotes(){
+  if(!score||selection.length===0)return;
+  // Sort descending to safely splice
+  const sorted=[...selection].sort((a,b)=> a.m!==b.m ? b.m-a.m : b.n-a.n);
+  sorted.forEach(({m,n})=>{ score.measures[m].notes.splice(n,1); });
+  selection=[];selAnchor=null;
+  // Adjust cursor
+  cursor.m=Math.min(cursor.m,score.measures.length-1);
+  cursor.n=Math.min(cursor.n,score.measures[cursor.m].notes.length);
+  markDirty();renderScore();
+  toast(`已删除 ${sorted.length} 个音符`);
+}
+
 function delForward(){if(!score)return;const m=score.measures[cursor.m];if(cursor.n<m.notes.length){m.notes.splice(cursor.n,1);markDirty();renderScore();}else if(cursor.m<score.measures.length-1){const next=score.measures[cursor.m+1];m.notes=m.notes.concat(next.notes);m.linebreak=next.linebreak;score.measures.splice(cursor.m+1,1);markDirty();renderScore();}}
+
 function moveCursorLeft(){if(!score)return;if(cursor.n>0)cursor.n--;else if(cursor.m>0){cursor.m--;cursor.n=score.measures[cursor.m].notes.length;}renderScore();}
 function moveCursorRight(){if(!score)return;const m=score.measures[cursor.m];if(cursor.n<m.notes.length)cursor.n++;else if(cursor.m<score.measures.length-1){cursor.m++;cursor.n=0;}renderScore();}
 function addMeasure(){if(!score)return;score.measures.push({notes:[],linebreak:false});cursor.m=score.measures.length-1;cursor.n=0;markDirty();renderScore();}
@@ -725,28 +913,131 @@ function togAcc(v){curAcc=curAcc===v?0:v;document.getElementById('shBtn').classN
 function setKey(k){if(score){score.key=k;markDirty();renderScore();}}
 function setTimeSig(v){if(score){score.timeSig=v;markDirty();renderScore();}}
 function setTempo(v){if(score){score.tempo=parseInt(v);document.getElementById('tempoVal').textContent=v;markDirty();}}
-function markDirty(){dirty=true;setSaveSt('未保存 ●');}
+function markDirty(){dirty=true;setSaveSt('未保存 ●');scheduleAutoSave();}
 function setSaveSt(s){document.getElementById('saveSt').textContent=s;}
 function setStatus(m){document.getElementById('statusMsg').textContent=m;}
+
+// ── Copy / Paste ──
+function copySelection() {
+  if (!score) return;
+  let notesToCopy = [];
+  if (selection.length > 0) {
+    // Copy selected notes (in order)
+    const sorted = [...selection].sort((a,b) => a.m!==b.m ? a.m-b.m : a.n-b.n);
+    notesToCopy = sorted.map(({m,n}) => JSON.parse(JSON.stringify(score.measures[m].notes[n])));
+  } else {
+    // Copy the note at cursor (if any)
+    const m = score.measures[cursor.m];
+    if (cursor.n < m.notes.length) {
+      notesToCopy = [JSON.parse(JSON.stringify(m.notes[cursor.n]))];
+    }
+  }
+  if (!notesToCopy.length) { toast('没有可复制的音符'); return; }
+  clipboard = notesToCopy;
+  toast(`已复制 ${clipboard.length} 个音符`);
+}
+
+function pasteNotes() {
+  if (!score || !clipboard.length) { toast('剪贴板为空'); return; }
+  const copies = clipboard.map(n => JSON.parse(JSON.stringify(n)));
+  copies.forEach((n, i) => {
+    score.measures[cursor.m].notes.splice(cursor.n + i, 0, n);
+  });
+  cursor.n += copies.length;
+  selection = [];
+  markDirty(); renderScore();
+  toast(`已粘贴 ${copies.length} 个音符`);
+}
 
 // Keyboard
 document.addEventListener('keydown',e=>{
   if(!score)return;
   const tag=e.target.tagName;
   if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
+
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'){saveScore();e.preventDefault();return;}
+  if((e.ctrlKey||e.metaKey)&&e.key==='c'){copySelection();e.preventDefault();return;}
+  if((e.ctrlKey||e.metaKey)&&e.key==='v'){pasteNotes();e.preventDefault();return;}
+  if((e.ctrlKey||e.metaKey)&&e.key==='a'){selectAll();e.preventDefault();return;}
+
   if('1234567'.includes(e.key)){ins(e.key);e.preventDefault();}
   else if(e.key==='0'){ins('0');e.preventDefault();}
   else if(e.key==='ArrowUp'){adjOct(1);e.preventDefault();}
   else if(e.key==='ArrowDown'){adjOct(-1);e.preventDefault();}
-  else if(e.key==='ArrowLeft'){moveCursorLeft();e.preventDefault();}
-  else if(e.key==='ArrowRight'){moveCursorRight();e.preventDefault();}
+  else if(e.key==='ArrowLeft'){selection=[];moveCursorLeft();e.preventDefault();}
+  else if(e.key==='ArrowRight'){selection=[];moveCursorRight();e.preventDefault();}
   else if(e.key==='Backspace'){delSel();e.preventDefault();}
-  else if(e.key==='Delete'){delForward();e.preventDefault();}
+  else if(e.key==='Delete'){
+    if(selection.length>0)deleteSelectedNotes();
+    else delForward();
+    e.preventDefault();
+  }
   else if(e.key===' '){togglePlay();e.preventDefault();}
   else if(e.key==='Enter'&&!e.shiftKey){insBar();e.preventDefault();}
   else if(e.key==='Enter'&&e.shiftKey){insLineBreak();e.preventDefault();}
-  else if((e.ctrlKey||e.metaKey)&&e.key==='s'){saveScore();e.preventDefault();}
+  else if(e.key==='Escape'){selection=[];selAnchor=null;renderScore();e.preventDefault();}
 });
+
+function selectAll() {
+  if (!score) return;
+  selection = [];
+  score.measures.forEach((m, mi) => m.notes.forEach((n, ni) => selection.push({m:mi, n:ni})));
+  renderScore();
+  toast(`已全选 ${selection.length} 个音符`);
+}
+
+// ══════════════════════════════════════════════
+// Print
+// ══════════════════════════════════════════════
+function printScore() {
+  if (!score) return;
+  window.print();
+}
+
+// ══════════════════════════════════════════════
+// Share Link
+// ══════════════════════════════════════════════
+function openShareModal() {
+  if (!score) return;
+  const modal = document.getElementById('shareModalOverlay');
+  const input = document.getElementById('shareLinkInput');
+  const note = document.getElementById('shareModalNote');
+
+  if (score.is_public) {
+    const link = `${window.location.origin}${window.location.pathname}?score=${activeId}`;
+    input.value = link;
+    note.innerHTML = '✅ 此乐谱已公开，任何人可通过链接查看并播放。<br>可直接分享给朋友！';
+  } else {
+    input.value = '（乐谱未公开，无法生成分享链接）';
+    note.innerHTML = '⚠️ 请先点击「分享到广场」将乐谱设为公开，才能生成有效的分享链接。';
+  }
+  modal.classList.add('show');
+}
+
+function closeShareModal() {
+  document.getElementById('shareModalOverlay').classList.remove('show');
+}
+
+function copyShareLink() {
+  const input = document.getElementById('shareLinkInput');
+  if (!score?.is_public) { toast('请先将乐谱设为公开'); return; }
+  navigator.clipboard.writeText(input.value).then(() => toast('链接已复制到剪贴板')).catch(() => {
+    input.select(); document.execCommand('copy'); toast('链接已复制');
+  });
+}
+
+// Open a preview by score id (for shared links)
+async function openPreviewById(scoreId) {
+  // Try in already-loaded plazaScores first
+  let s = plazaScores.find(x => x.id === scoreId);
+  if (!s) {
+    const { data } = await sb.from('public_scores')
+      .select('id,title,composer,key,time_sig,tempo,measures,play_count,updated_at,user_id,author,fav_count')
+      .eq('id', scoreId).single();
+    if (data) { s = data; plazaScores.push(data); }
+  }
+  if (s) openPreview(s.id);
+}
 
 // ══════════════════════════════════════════════
 // Playback
@@ -807,7 +1098,6 @@ function toggleFavFilter() {
 
 function renderPlaza() {
   const grid = document.getElementById('plazaGrid');
-  // 筛选：开启收藏模式时只显示收藏过的
   const list = favFilterOn ? plazaScores.filter(s => myFavIds.has(s.id)) : plazaScores;
   if (!list.length) {
     grid.innerHTML = favFilterOn
@@ -847,7 +1137,6 @@ async function toggleFav(scoreId, e) {
     myFavIds.add(scoreId);
     toast('已收藏');
   }
-  // update fav_count locally
   const s = plazaScores.find(x=>x.id===scoreId);
   if (s) s.fav_count = parseInt(s.fav_count)+(isFav?-1:1);
   renderPlaza();
@@ -859,7 +1148,6 @@ function openPreview(scoreId) {
   if (!s) return;
   previewScore = s;
   document.getElementById('previewTitle').textContent = (s.title||'未命名') + ' — ' + (s.author||'');
-  // render readonly score
   const container = document.getElementById('previewScore');
   container.innerHTML = renderReadonlyScore(s);
   const isOwn = currentUser && s.user_id === currentUser.id;
@@ -868,7 +1156,6 @@ function openPreview(scoreId) {
   if (isOwn) { forkBtn.style.display='none'; }
   else { forkBtn.style.display=''; forkBtn.textContent = isFav?'取消收藏':'收藏此乐谱'; forkBtn.className='btn '+(isFav?'':'primary'); }
   document.getElementById('previewOverlay').classList.add('show');
-  // increment play_count
   sb.from('scores').update({play_count: (s.play_count||0)+1}).eq('id',scoreId);
 }
 
@@ -877,6 +1164,7 @@ function closePreview() {
   stopPreviewPlay();
 }
 
+// ── Readonly score render (supports linebreak) ──
 function renderReadonlyScore(s) {
   const meta = `<div style="text-align:center;margin-bottom:10px">
     <div style="font-size:20px;font-weight:700">${esc(s.title||'未命名')}</div>
@@ -889,33 +1177,42 @@ function renderReadonlyScore(s) {
   if (!measures.length || measures.every(m=>m.notes.length===0)) {
     return html + '<div class="score-empty">（空谱）</div>';
   }
-  const PER=4;
-  for(let st=0;st<measures.length;st+=PER){
-    html+='<div class="staff-line">';
-    for(let mi=st;mi<Math.min(st+PER,measures.length);mi++){
-      const m=measures[mi];
-      html+=`<div class="measure"><span class="mnum">${mi+1}</span><div class="notes-row">`;
-      if(!m.notes.length){ html+='<span class="empty-m">空</span>'; }
-      else m.notes.forEach(n=>{
-        const acc=n.acc===1?'#':n.acc===-1?'b':'';
-        const isRest=n.num==='0';
+
+  // Use linebreak to split rows, same as editor
+  const rows = [];
+  let currentRow = [];
+  measures.forEach((m, mi) => {
+    currentRow.push(mi);
+    if (m.linebreak) { rows.push(currentRow); currentRow = []; }
+  });
+  if (currentRow.length) rows.push(currentRow);
+
+  rows.forEach(rowMeasures => {
+    html += '<div class="staff-line">';
+    rowMeasures.forEach(mi => {
+      const m = measures[mi];
+      html += `<div class="measure"><span class="mnum">${mi+1}</span><div class="notes-row">`;
+      if (!m.notes.length) { html += '<span class="empty-m">空</span>'; }
+      else m.notes.forEach(n => {
+        const acc = n.acc===1?'#':n.acc===-1?'b':'';
+        const isRest = n.num==='0';
         let tD='',bD='';
         if(n.octave>0)for(let i=0;i<n.octave;i++)tD+='<div class="odot"></div>';
         if(n.octave<0)for(let i=0;i<-n.octave;i++)bD+='<div class="odot"></div>';
         let ul='';
         if(n.dur==='e')ul='<div class="nul"></div>';
         if(n.dur==='s')ul='<div class="nul"></div><div class="nul"></div>';
-        html+=`<div class="note-cell" style="cursor:default"><div class="nc-inner">
+        html += `<div class="note-cell" style="cursor:default"><div class="nc-inner">
           <div class="ndots-t">${tD}</div>
           <div class="nnum${isRest?' rest':''}">${acc}${isRest?'—':n.num}${n.aug?'<span class="augdot"></span>':''}</div>
           <div class="nul-wrap">${ul}</div>
           <div class="ndots-b">${bD}</div>
         </div></div>`;
       });
-      html+=`</div></div>`;
-    }
-    html+='</div>';
-  }
+      html += `</div></div>`;
+    });
+    html += '</div>';
+  });
   return html;
 }
 
@@ -932,7 +1229,6 @@ function resetPreviewPlay(){const b=document.getElementById('previewPlayBtn');if
 
 async function forkScore() {
   if(!previewScore||!currentUser)return;
-  const isFav = myFavIds.has(previewScore.id);
   await toggleFav(previewScore.id, {stopPropagation:()=>{}});
   const forkBtn=document.getElementById('forkBtn');
   const nowFav=myFavIds.has(previewScore.id);
