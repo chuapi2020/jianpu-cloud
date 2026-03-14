@@ -42,6 +42,8 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
 .btn.play:hover{background:#166040}
 .btn.ghost{background:transparent;border-color:#555;color:#ccc}
 .btn.ghost:hover{border-color:#fff;color:#fff}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.btn:disabled:hover{border-color:var(--border);color:var(--ink)}
 
 /* ── Views ── */
 .view{display:none;flex:1;overflow:hidden}
@@ -73,7 +75,7 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
    EDITOR VIEW
 ════════════════════════════════ */
 .editor-view{flex-direction:row}
-.library{width:210px;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--paper2);flex-shrink:0}
+.library{width:210px;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--paper2);flex-shrink:0;transition:transform .25s}
 .lib-hd{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
 .lib-title{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--ink2);text-transform:uppercase}
 .lib-new{background:var(--accent);color:#fff;border:none;border-radius:4px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:'Noto Serif SC',serif}
@@ -110,7 +112,7 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
 .note-cell{display:flex;flex-direction:column;align-items:center;min-width:30px;padding:0 3px;cursor:pointer;border-radius:3px;position:relative;user-select:none}
 .nc-inner{display:flex;flex-direction:column;align-items:center;padding:2px 3px;width:100%;border-radius:3px;transition:background .1s}
 .note-cell:hover .nc-inner{background:rgba(192,57,43,.08)}
-.note-cell.sel .nc-inner{background:rgba(192,57,43,.28);outline:2px solid var(--accent);outline-offset:1px;border-radius:3px}
+.note-cell.sel .nc-inner{background:rgba(192,57,43,.18)}
 .note-cell.cursor-before::before{content:'';position:absolute;left:-2px;top:8px;bottom:4px;width:2px;background:var(--cursor-clr);border-radius:1px;animation:blink .9s steps(1) infinite;z-index:10}
 .cursor-end-beam{width:3px;min-width:3px;align-self:stretch;position:relative;margin-left:2px;margin-right:4px}
 .cursor-end-beam::before{content:'';position:absolute;left:0;top:8px;bottom:4px;width:2px;background:var(--cursor-clr);border-radius:1px;animation:blink .9s steps(1) infinite}
@@ -142,7 +144,8 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
 .dur-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 .divider{width:1px;height:22px;background:var(--border);flex-shrink:0}
 .tempo-val{font-family:'DM Mono',monospace;font-size:12px;min-width:32px}
-.statusbar{background:var(--ink);color:#aaa;padding:4px 16px;font-size:11px;display:flex;gap:16px;align-items:center;font-family:'DM Mono',monospace;flex-shrink:0}
+.statusbar{background:var(--ink);color:#aaa;padding:4px 16px;font-size:11px;display:flex;gap:16px;align-items:center;font-family:'DM Mono',monospace;flex-shrink:0;flex-wrap:wrap}
+.statusbar .hint{margin-left:auto}
 
 /* Share badge on lib item */
 .lib-pub-badge{display:inline-block;font-size:9px;background:#1a7a4a;color:#fff;border-radius:3px;padding:1px 4px;margin-left:4px;vertical-align:middle}
@@ -150,7 +153,6 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
 /* ════════════════════════════════
    PLAZA VIEW
 ════════════════════════════════ */
-.plaza-view{flex-direction:column;background:var(--paper)}
 .plaza-header{padding:16px 24px 0;flex-shrink:0}
 .plaza-title{font-size:20px;font-weight:700;margin-bottom:12px}
 .plaza-search-row{display:flex;gap:8px;margin-bottom:16px}
@@ -166,27 +168,18 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
 .fav-btn{position:absolute;top:14px;right:14px;background:none;border:none;font-size:18px;cursor:pointer;line-height:1;transition:transform .15s}
 .fav-btn:hover{transform:scale(1.2)}
 .fav-btn.active{color:#e74c3c}
-.btn.fav-filter-on{background:#e74c3c;color:#fff;border-color:#e74c3c}
-.btn.fav-filter-on:hover{background:#c0392b}
 .plaza-empty{grid-column:1/-1;text-align:center;padding:60px;color:var(--ink3);font-size:14px;line-height:2}
+.plaza-sentinel{grid-column:1/-1;height:1px}
+.plaza-loading-more{grid-column:1/-1;text-align:center;padding:16px;color:var(--ink3);font-size:13px}
 
-/* ── Score Preview Modal (larger) ── */
-.preview-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+/* Score preview modal */
+.preview-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .preview-overlay.show{opacity:1;pointer-events:all}
-.preview-modal{background:#fff;border-radius:12px;width:96%;max-width:860px;height:88vh;display:flex;flex-direction:column;box-shadow:0 12px 48px rgba(0,0,0,.25)}
-.preview-header{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
-.preview-title{font-size:16px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.preview-body{flex:1;overflow-y:auto;padding:20px 32px}
-.preview-actions{padding:12px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0}
-
-/* Share link modal */
-.share-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:250;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
-.share-modal-overlay.show{opacity:1;pointer-events:all}
-.share-modal{background:#fff;border-radius:12px;padding:28px 32px;width:90%;max-width:480px;box-shadow:0 8px 40px rgba(0,0,0,.18)}
-.share-modal-title{font-size:16px;font-weight:700;margin-bottom:16px}
-.share-link-box{display:flex;gap:8px;align-items:center;margin-bottom:12px}
-.share-link-input{flex:1;border:1px solid var(--border);border-radius:6px;padding:9px 12px;font-size:12px;font-family:'DM Mono',monospace;color:var(--ink2);background:var(--paper2);outline:none}
-.share-modal-note{font-size:12px;color:var(--ink3);line-height:1.7}
+.preview-modal{background:#fff;border-radius:12px;width:90%;max-width:680px;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 12px 48px rgba(0,0,0,.2)}
+.preview-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.preview-title{font-size:16px;font-weight:700;flex:1}
+.preview-body{flex:1;overflow-y:auto;padding:20px 28px}
+.preview-actions{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
 
 /* ── Confirm Modal ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -210,19 +203,48 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
 .spinner{width:18px;height:18px;border:2px solid #ddd;border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── Print styles ── */
-@media print {
-  body{overflow:visible;height:auto;background:#fff}
-  .app{height:auto;overflow:visible}
-  .header,.library,.toolbar,.statusbar,#toolbar{display:none!important}
-  .view.active{display:block!important;overflow:visible}
-  .editor-main{overflow:visible}
-  .score-view{overflow:visible;padding:0}
-  .score-paper{border:none;box-shadow:none;padding:16px 0}
-  .score-title-input,.score-comp-input{pointer-events:none}
-  .staff-line{page-break-inside:avoid;overflow:visible}
-  .note-cell.cursor-before::before{display:none}
-  .cursor-end-beam{display:none}
+/* Mobile drawer toggle */
+.mob-lib-toggle{display:none;background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:0 8px;line-height:48px;flex-shrink:0}
+
+/* ════════════════════════════════
+   RESPONSIVE — mobile
+════════════════════════════════ */
+@media (max-width:700px){
+  .header{padding:0 8px}
+  .logo{font-size:14px;margin-right:6px}
+  .nav-tab{padding:0 10px;font-size:12px}
+  .save-st{display:none}
+  #userNick{display:none}
+  .mob-lib-toggle{display:block}
+
+  /* Library slides in as a drawer */
+  .editor-view{position:relative}
+  .library{
+    position:absolute;left:0;top:0;bottom:0;z-index:100;
+    transform:translateX(-100%);
+    box-shadow:4px 0 16px rgba(0,0,0,.15);
+    width:240px;
+  }
+  .library.open{transform:translateX(0)}
+
+  .score-paper{padding:20px 14px}
+  .score-title-input{font-size:17px}
+  .score-view{padding:10px}
+  .toolbar{padding:6px 8px;gap:5px}
+  .tb-row{gap:3px}
+  .kbtn{min-width:28px;padding:6px 2px;font-size:15px}
+  .dur-btn{padding:4px 7px;font-size:10px}
+  .btn{padding:4px 8px;font-size:11px}
+  .statusbar .hint{display:none}
+  .plaza-grid{padding:0 12px 12px;grid-template-columns:1fr 1fr}
+  .plaza-header{padding:12px 12px 0}
+  .preview-modal{width:96%;max-height:90vh}
+  .preview-body{padding:14px 16px}
+}
+
+@media (max-width:420px){
+  .plaza-grid{grid-template-columns:1fr}
+  .nav-tab{padding:0 7px;font-size:11px}
 }
 </style>
 </head>
@@ -231,14 +253,14 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
 
   <!-- ══ HEADER ══ -->
   <div class="header" id="mainHeader" style="display:none">
+    <!-- FIX F1: Mobile drawer toggle -->
+    <button class="mob-lib-toggle" id="mobLibToggle" onclick="toggleMobileLib()" aria-label="切换乐谱列表">☰</button>
     <div class="logo">简<span>谱</span>云</div>
     <div class="nav-tab active" onclick="switchView('editor')" id="navEditor">我的乐谱</div>
     <div class="nav-tab" onclick="switchView('plaza')" id="navPlaza">乐谱广场</div>
     <div class="header-right">
       <span class="save-st" id="saveSt"></span>
-      <button class="btn" onclick="printScore()" id="printBtn" style="display:none" title="打印乐谱">🖨 打印</button>
-      <button class="btn" onclick="openShareModal()" id="shareLinkBtn" style="display:none" title="生成分享链接">🔗 链接</button>
-      <button class="btn save-btn" id="headerSaveBtn" onclick="saveScore()" style="display:none">保存</button>
+      <button class="btn save-btn" id="headerSaveBtn" onclick="saveScore(false)" style="display:none">保存</button>
       <div class="user-chip" id="userChip">
         <div class="user-avatar" id="userAvatar">?</div>
         <span id="userNick"></span>
@@ -263,8 +285,9 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
         </div>
         <div class="form-group">
           <label class="form-label">密码</label>
-          <!-- FIX: 原来 onkeydown 里用了未定义的 e，改为 event -->
-          <input class="form-input" type="password" id="loginPwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+          <!-- FIX B1: use event (not undefined e) in inline handler -->
+          <input class="form-input" type="password" id="loginPwd" placeholder="••••••••"
+            onkeydown="if(event.key==='Enter') doLogin()">
         </div>
         <button class="form-btn" onclick="doLogin()" id="loginBtn">登录</button>
         <div class="auth-msg" id="loginMsg"></div>
@@ -290,7 +313,7 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
 
   <!-- ══ EDITOR VIEW ══ -->
   <div class="view editor-view" id="viewEditor">
-    <div class="library">
+    <div class="library" id="library">
       <div class="lib-hd">
         <span class="lib-title">我的乐谱</span>
         <button class="lib-new" onclick="newScore()">+ 新建</button>
@@ -310,6 +333,7 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
       </div>
       <div id="toolbar" style="display:none">
         <div class="toolbar">
+          <!-- Row 1: playback / score settings / share / export -->
           <div class="tb-row">
             <button class="btn play" id="playBtn" onclick="togglePlay()">▶ 播放</button>
             <div class="divider"></div>
@@ -332,7 +356,11 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
             <button class="btn" onclick="loadExample()">示例</button>
             <div class="divider"></div>
             <button class="btn" id="shareBtn" onclick="toggleShare()" title="发布到乐谱广场">分享到广场</button>
+            <div class="divider"></div>
+            <!-- FIX F3: PNG export -->
+            <button class="btn" onclick="exportScoreAsPng()" title="导出为 PNG 图片">导出 PNG</button>
           </div>
+          <!-- Row 2: note input / undo-redo -->
           <div class="tb-row">
             <span class="tbl">音符</span>
             <div id="keyGrid" style="display:flex;gap:3px"></div>
@@ -340,10 +368,13 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
             <button class="kbtn bar" onclick="insBar()">|</button>
             <button class="kbtn newline" onclick="insLineBreak()" title="换行">↵</button>
             <div class="divider"></div>
-            <button class="btn" onclick="copySelection()" title="复制选中音符 (Ctrl+C)">复制</button>
-            <button class="btn" onclick="pasteNotes()" title="粘贴 (Ctrl+V)">粘贴</button>
             <button class="btn" onclick="delSel()" style="color:#c0392b">⌫ 删除</button>
+            <div class="divider"></div>
+            <!-- FIX F2: Undo / Redo -->
+            <button class="btn" id="undoBtn" onclick="undo()" title="撤销 Ctrl+Z" disabled>↩ 撤销</button>
+            <button class="btn" id="redoBtn" onclick="redo()" title="重做 Ctrl+Y / Ctrl+Shift+Z" disabled>↪ 重做</button>
           </div>
+          <!-- Row 3: duration / octave / accidentals -->
           <div class="tb-row">
             <span class="tbl">时值</span>
             <div id="durBtns" style="display:flex;gap:3px;flex-wrap:wrap"></div>
@@ -362,7 +393,7 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
       </div>
       <div class="statusbar">
         <span id="statusMsg">选择左侧乐谱，或新建</span>
-        <span style="margin-left:auto">← → 移动 · 1-7 音符 · Shift+点击 多选 · Ctrl+C/V 复制粘贴 · Del 删除 · Space 播放 · Ctrl+S 保存</span>
+        <span class="hint">← → 移动 · 1-7 音符 · Del 删除 · Space 播放 · Ctrl+S 保存 · Ctrl+Z 撤销</span>
       </div>
     </div>
   </div>
@@ -373,8 +404,7 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
       <div class="plaza-title">乐谱广场</div>
       <div class="plaza-search-row">
         <input class="plaza-search" id="plazaSearch" placeholder="搜索歌名、作曲…" oninput="debounceSearch()">
-        <button class="btn" onclick="loadPlaza()">搜索</button>
-        <button class="btn" id="favFilterBtn" onclick="toggleFavFilter()" title="只显示我收藏的乐谱">♥ 我的收藏</button>
+        <button class="btn" onclick="resetAndLoadPlaza()">搜索</button>
       </div>
     </div>
     <div class="plaza-grid" id="plazaGrid">
@@ -401,23 +431,6 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
   </div>
 </div>
 
-<!-- Share Link Modal -->
-<div class="share-modal-overlay" id="shareModalOverlay" onclick="if(event.target===this)closeShareModal()">
-  <div class="share-modal">
-    <div class="share-modal-title">🔗 分享乐谱链接</div>
-    <div id="shareModalBody">
-      <div class="share-link-box">
-        <input class="share-link-input" id="shareLinkInput" readonly>
-        <button class="btn primary" onclick="copyShareLink()">复制</button>
-      </div>
-      <div class="share-modal-note" id="shareModalNote"></div>
-    </div>
-    <div style="margin-top:16px;display:flex;justify-content:flex-end">
-      <button class="btn" onclick="closeShareModal()">关闭</button>
-    </div>
-  </div>
-</div>
-
 <!-- Confirm Modal -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
@@ -436,72 +449,81 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
 // ══════════════════════════════════════════════
 // CONFIG
 // ══════════════════════════════════════════════
-const SUPABASE_URL = 'https://ywahjuecnjjzhrkuidbj.supabase.co';
+const SUPABASE_URL     = 'https://ywahjuecnjjzhrkuidbj.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_Ob6coi6A0K0845oZWJGD9g_2uq8FuB3';
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ══════════════════════════════════════════════
+// Constants
+// ══════════════════════════════════════════════
+const DURS = [
+  {id:'w', label:'全音符', beats:4},
+  {id:'h', label:'二分',   beats:2},
+  {id:'q', label:'四分',   beats:1},
+  {id:'e', label:'八分',   beats:0.5},
+  {id:'s', label:'十六',   beats:0.25}
+];
+
+const SCALE = {
+  C:  [0,2,4,5,7,9,11],
+  G:  [7,9,11,12,14,16,17],
+  D:  [2,4,6,7,9,11,13],
+  A:  [9,11,13,14,16,18,20],
+  E:  [4,6,8,9,11,13,15],
+  F:  [-5,-3,-1,0,2,4,6],
+  Bb: [-2,0,2,3,5,7,9],
+  Eb: [3,5,7,8,10,12,14]
+};
+
+const AUTO_SAVE_MS  = 30000; // 30 s auto-save interval
+const PLAZA_PAGE_SZ = 24;    // cards per page
+const UNDO_LIMIT    = 100;   // max undo history depth
+
+// ══════════════════════════════════════════════
 // State
 // ══════════════════════════════════════════════
-const DURS=[{id:'w',label:'全音符',beats:4},{id:'h',label:'二分',beats:2},{id:'q',label:'四分',beats:1},{id:'e',label:'八分',beats:.5},{id:'s',label:'十六',beats:.25}];
-const SCALE={C:[0,2,4,5,7,9,11],G:[7,9,11,12,14,16,17],D:[2,4,6,7,9,11,13],A:[9,11,13,14,16,18,20],E:[4,6,8,9,11,13,15],F:[-5,-3,-1,0,2,4,6],Bb:[-2,0,2,3,5,7,9],Eb:[3,5,7,8,10,12,14]};
-
-let currentUser = null;
-let userProfile = null;
-let myScores = [];
-let activeId = null;
-let score = null;
-let cursor = {m:0, n:0};
-let curDur='q', curOct=0, curAug=false, curAcc=0;
-let playing=false, playTimer=null, audioCtx=null;
-let dirty=false;
-let pendingDeleteId=null;
-let previewScore=null;
-let myFavIds=new Set();
-let plazaScores=[];
-let favFilterOn=false;
-let searchTimer=null;
-
-// Selection state: array of {m, n} positions
-let selection = [];
-let selAnchor = null; // for shift-click range
-
-// Clipboard
-let clipboard = [];
-
-// Auto-save
-let autoSaveTimer = null;
-const AUTO_SAVE_DELAY = 3000; // 3 seconds after last edit
+let currentUser    = null;
+let userProfile    = null;
+let myScores       = [];
+let activeId       = null;
+let score          = null;
+let cursor         = {m:0, n:0};
+let curDur         = 'q';
+let curOct         = 0;
+let curAug         = false;
+let curAcc         = 0;
+let playing        = false;
+let playTimer      = null;
+let audioCtx       = null;
+let dirty          = false;
+let pendingDeleteId = null;
+let previewScore   = null;
+let myFavIds       = new Set();
+let plazaScores    = [];
+let plazaPage      = 0;
+let plazaHasMore   = true;
+let plazaLoading   = false;
+let plazaObserver  = null;
+let plazaSearchTimer = null;
+let autoSaveTimer  = null;
+// FIX F2 – undo/redo stacks: [{measures, cursor}]
+let undoStack = [];
+let redoStack = [];
 
 // ══════════════════════════════════════════════
 // Auth
 // ══════════════════════════════════════════════
 async function initAuth() {
-  // Check URL for shared score
-  const urlParams = new URLSearchParams(window.location.search);
-  const sharedId = urlParams.get('score');
-
   const { data: { session } } = await sb.auth.getSession();
-  if (session?.user) {
-    await onSignedIn(session.user);
-    // If there's a shared score in URL, open plaza and preview it
-    if (sharedId) {
-      switchView('plaza');
-      await loadPlaza();
-      setTimeout(() => openPreviewById(sharedId), 500);
-    }
-  } else if (sharedId) {
-    // Not logged in but has shared link — show plaza preview after login
-    sessionStorage.setItem('pendingSharedScore', sharedId);
-  }
+  if (session && session.user) await onSignedIn(session.user);
 }
 
 async function onSignedIn(user) {
   currentUser = user;
   const { data } = await sb.from('profiles').select('nickname').eq('id', user.id).single();
   userProfile = data;
-  const nick = data?.nickname || user.email.split('@')[0];
+  const nick = (data && data.nickname) ? data.nickname : user.email.split('@')[0];
   document.getElementById('userNick').textContent = nick;
   document.getElementById('userAvatar').textContent = nick.charAt(0).toUpperCase();
   document.getElementById('mainHeader').style.display = 'flex';
@@ -509,654 +531,848 @@ async function onSignedIn(user) {
   switchView('editor');
   await loadMyScores();
   await loadMyFavs();
-
-  // Handle pending shared score from before login
-  const pending = sessionStorage.getItem('pendingSharedScore');
-  if (pending) {
-    sessionStorage.removeItem('pendingSharedScore');
-    switchView('plaza');
-    await loadPlaza();
-    setTimeout(() => openPreviewById(pending), 500);
-  }
+  startAutoSave();
 }
 
 async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
-  const pwd = document.getElementById('loginPwd').value;
-  const btn = document.getElementById('loginBtn');
-  const msg = document.getElementById('loginMsg');
-  if (!email||!pwd) { showAuthMsg(msg,'请填写邮箱和密码','err'); return; }
-  btn.disabled=true; btn.textContent='登录中…';
-  const { data, error } = await sb.auth.signInWithPassword({email, password:pwd});
-  btn.disabled=false; btn.textContent='登录';
-  if (error) { showAuthMsg(msg, error.message==='Invalid login credentials'?'邮箱或密码错误':error.message, 'err'); return; }
-  showAuthMsg(msg,'登录成功','ok');
+  const pwd   = document.getElementById('loginPwd').value;
+  const btn   = document.getElementById('loginBtn');
+  const msg   = document.getElementById('loginMsg');
+  if (!email || !pwd) { showAuthMsg(msg, '请填写邮箱和密码', 'err'); return; }
+  btn.disabled = true; btn.textContent = '登录中…';
+  const { data, error } = await sb.auth.signInWithPassword({email, password: pwd});
+  btn.disabled = false; btn.textContent = '登录';
+  if (error) {
+    showAuthMsg(msg, error.message === 'Invalid login credentials' ? '邮箱或密码错误' : error.message, 'err');
+    return;
+  }
+  showAuthMsg(msg, '登录成功', 'ok');
   await onSignedIn(data.user);
 }
 
 async function doRegister() {
   const email = document.getElementById('regEmail').value.trim();
-  const pwd = document.getElementById('regPwd').value;
-  const nick = document.getElementById('regNick').value.trim();
-  const btn = document.getElementById('regBtn');
-  const msg = document.getElementById('regMsg');
-  if (!email||!pwd) { showAuthMsg(msg,'请填写邮箱和密码','err'); return; }
-  if (pwd.length<6) { showAuthMsg(msg,'密码至少 6 位','err'); return; }
-  btn.disabled=true; btn.textContent='注册中…';
-  const { data, error } = await sb.auth.signUp({email, password:pwd});
-  btn.disabled=false; btn.textContent='创建账号';
+  const pwd   = document.getElementById('regPwd').value;
+  const nick  = document.getElementById('regNick').value.trim();
+  const btn   = document.getElementById('regBtn');
+  const msg   = document.getElementById('regMsg');
+  if (!email || !pwd) { showAuthMsg(msg, '请填写邮箱和密码', 'err'); return; }
+  if (pwd.length < 6) { showAuthMsg(msg, '密码至少 6 位', 'err'); return; }
+  btn.disabled = true; btn.textContent = '注册中…';
+  const { data, error } = await sb.auth.signUp({email, password: pwd});
+  btn.disabled = false; btn.textContent = '创建账号';
   if (error) { showAuthMsg(msg, error.message, 'err'); return; }
   if (nick && data.user) {
-    await sb.from('profiles').update({nickname:nick}).eq('id', data.user.id);
+    await sb.from('profiles').update({nickname: nick}).eq('id', data.user.id);
   }
-  showAuthMsg(msg,'注册成功！请检查邮箱完成验证，然后登录。','ok');
+  showAuthMsg(msg, '注册成功！请检查邮箱完成验证，然后登录。', 'ok');
 }
 
 async function signOut() {
   stopAutoSave();
   await sb.auth.signOut();
-  currentUser=null; score=null; activeId=null; myScores=[];
-  document.getElementById('mainHeader').style.display='none';
+  currentUser = null; score = null; activeId = null; myScores = [];
+  undoStack = []; redoStack = [];
+  refreshUndoRedoUI();
+  document.getElementById('mainHeader').style.display = 'none';
   document.getElementById('viewEditor').classList.remove('active');
   document.getElementById('viewPlaza').classList.remove('active');
   document.getElementById('viewAuth').classList.add('active');
-  document.getElementById('toolbar').style.display='none';
+  document.getElementById('toolbar').style.display = 'none';
 }
 
 function switchAuthTab(tab) {
-  document.getElementById('authLoginForm').style.display = tab==='login'?'':'none';
-  document.getElementById('authRegisterForm').style.display = tab==='register'?'':'none';
-  document.getElementById('tabLogin').classList.toggle('active', tab==='login');
-  document.getElementById('tabRegister').classList.toggle('active', tab==='register');
+  document.getElementById('authLoginForm').style.display    = (tab === 'login')    ? '' : 'none';
+  document.getElementById('authRegisterForm').style.display = (tab === 'register') ? '' : 'none';
+  document.getElementById('tabLogin').classList.toggle('active',    tab === 'login');
+  document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
 }
 
 function showAuthMsg(el, msg, type) {
-  el.textContent=msg; el.className='auth-msg '+type;
+  el.textContent = msg;
+  el.className = 'auth-msg ' + type;
 }
 
 // ══════════════════════════════════════════════
 // Views
 // ══════════════════════════════════════════════
 function switchView(v) {
-  document.getElementById('viewEditor').classList.toggle('active', v==='editor');
-  document.getElementById('viewPlaza').classList.toggle('active', v==='plaza');
-  document.getElementById('navEditor').classList.toggle('active', v==='editor');
-  document.getElementById('navPlaza').classList.toggle('active', v==='plaza');
-  document.getElementById('headerSaveBtn').style.display = v==='editor'?'':'none';
-  document.getElementById('printBtn').style.display = v==='editor'&&score?'':'none';
-  document.getElementById('shareLinkBtn').style.display = v==='editor'&&score?'':'none';
-  if (v==='plaza') loadPlaza();
+  document.getElementById('viewEditor').classList.toggle('active', v === 'editor');
+  document.getElementById('viewPlaza').classList.toggle('active',  v === 'plaza');
+  document.getElementById('navEditor').classList.toggle('active',  v === 'editor');
+  document.getElementById('navPlaza').classList.toggle('active',   v === 'plaza');
+  document.getElementById('headerSaveBtn').style.display = (v === 'editor') ? '' : 'none';
+  if (v === 'plaza') resetAndLoadPlaza();
+  // Close mobile drawer when switching
+  closeMobileLib();
 }
 
 // ══════════════════════════════════════════════
-// My Scores (Supabase)
+// FIX F1 – Mobile drawer
+// ══════════════════════════════════════════════
+function toggleMobileLib() {
+  document.getElementById('library').classList.toggle('open');
+}
+function closeMobileLib() {
+  document.getElementById('library').classList.remove('open');
+}
+
+// Close drawer on outside tap
+document.addEventListener('click', function(e) {
+  const lib    = document.getElementById('library');
+  const toggle = document.getElementById('mobLibToggle');
+  if (lib.classList.contains('open') && !lib.contains(e.target) && e.target !== toggle) {
+    closeMobileLib();
+  }
+});
+
+// ══════════════════════════════════════════════
+// FIX B4 – Auto-save
+// ══════════════════════════════════════════════
+function startAutoSave() {
+  stopAutoSave();
+  autoSaveTimer = setInterval(function() {
+    if (dirty && score && currentUser) saveScore(true);
+  }, AUTO_SAVE_MS);
+}
+function stopAutoSave() {
+  if (autoSaveTimer) { clearInterval(autoSaveTimer); autoSaveTimer = null; }
+}
+
+// ══════════════════════════════════════════════
+// My Scores
 // ══════════════════════════════════════════════
 async function loadMyScores() {
   const { data, error } = await sb.from('scores')
     .select('id,title,composer,key,time_sig,tempo,measures,is_public,updated_at')
     .eq('user_id', currentUser.id)
-    .order('updated_at', {ascending:false});
-  if (error) { toast('加载失败: '+error.message); return; }
+    .order('updated_at', {ascending: false});
+  if (error) { toast('加载失败: ' + error.message); return; }
   myScores = data || [];
   renderLib();
 }
 
 async function loadMyFavs() {
   const { data } = await sb.from('favorites').select('score_id').eq('user_id', currentUser.id);
-  myFavIds = new Set((data||[]).map(r=>r.score_id));
+  myFavIds = new Set((data || []).map(function(r) { return r.score_id; }));
 }
 
 function renderLib() {
-  const el = document.getElementById('libList');
-  if (!myScores.length) { el.innerHTML='<div class="lib-empty">暂无乐谱<br>点击「+ 新建」创建</div>'; return; }
-  el.innerHTML = myScores.map(s => {
-    const d=new Date(s.updated_at);
-    const ds=`${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
-    const nc = s.measures.reduce((a,m)=>a+m.notes.length, 0);
-    const pub = s.is_public ? '<span class="lib-pub-badge">公开</span>' : '';
-    return `<div class="lib-item${s.id===activeId?' active':''}" onclick="openScore('${s.id}')">
-      <button class="lib-del" onclick="askDelete('${s.id}',event)">×</button>
-      <div class="lib-item-t">${esc(s.title)||'未命名'}${pub}</div>
-      <div class="lib-item-m">${s.key}·${s.time_sig}·${nc}音·${ds}</div>
-    </div>`;
+  var el = document.getElementById('libList');
+  if (!myScores.length) {
+    el.innerHTML = '<div class="lib-empty">暂无乐谱<br>点击「+ 新建」创建</div>';
+    return;
+  }
+  el.innerHTML = myScores.map(function(s) {
+    var d  = new Date(s.updated_at);
+    var ds = (d.getMonth()+1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2,'0');
+    var nc = s.measures.reduce(function(a, m) { return a + m.notes.length; }, 0);
+    var pub = s.is_public ? '<span class="lib-pub-badge">公开</span>' : '';
+    return '<div class="lib-item' + (s.id === activeId ? ' active' : '') + '" onclick="openScore(\'' + s.id + '\')">'
+      + '<button class="lib-del" onclick="askDelete(\'' + s.id + '\',event)">×</button>'
+      + '<div class="lib-item-t">' + esc(s.title||'') + (s.title ? '' : '未命名') + pub + '</div>'
+      + '<div class="lib-item-m">' + s.key + '·' + s.time_sig + '·' + nc + '音·' + ds + '</div>'
+      + '</div>';
   }).join('');
 }
 
 async function newScore() {
   if (!currentUser) return;
-  const newS = {user_id:currentUser.id, title:'新建乐谱', composer:'', key:'C', time_sig:'4/4', tempo:80, measures:[{notes:[],linebreak:false}], is_public:false};
-  const { data, error } = await sb.from('scores').insert(newS).select().single();
-  if (error) { toast('创建失败'); return; }
-  myScores.unshift(data);
+  var newS = {
+    user_id:   currentUser.id,
+    title:     '新建乐谱',
+    composer:  '',
+    key:       'C',
+    time_sig:  '4/4',
+    tempo:     80,
+    measures:  [{notes:[], linebreak:false}],
+    is_public: false
+  };
+  var r = await sb.from('scores').insert(newS).select().single();
+  if (r.error) { toast('创建失败'); return; }
+  myScores.unshift(r.data);
   renderLib();
-  openScore(data.id);
+  openScore(r.data.id);
   toast('新建乐谱');
 }
 
 function openScore(id) {
-  const s = myScores.find(x=>x.id===id);
+  var s = myScores.find(function(x) { return x.id === id; });
   if (!s) return;
   activeId = id;
   score = JSON.parse(JSON.stringify(s));
   if (score.time_sig && !score.timeSig) score.timeSig = score.time_sig;
-  cursor={m:0,n:0}; dirty=false; selection=[]; selAnchor=null;
-  document.getElementById('toolbar').style.display='';
-  document.getElementById('printBtn').style.display='';
-  document.getElementById('shareLinkBtn').style.display='';
-  document.getElementById('keySelect').value=score.key;
-  document.getElementById('timeSig').value=score.timeSig||score.time_sig||'4/4';
-  document.getElementById('tempoSlider').value=score.tempo;
-  document.getElementById('tempoVal').textContent=score.tempo;
-  const shareBtn = document.getElementById('shareBtn');
+  cursor = {m:0, n:0};
+  dirty  = false;
+  // Reset undo/redo on score switch
+  undoStack = []; redoStack = [];
+  refreshUndoRedoUI();
+  document.getElementById('toolbar').style.display = '';
+  document.getElementById('keySelect').value       = score.key;
+  document.getElementById('timeSig').value         = score.timeSig || score.time_sig || '4/4';
+  document.getElementById('tempoSlider').value     = score.tempo;
+  document.getElementById('tempoVal').textContent  = score.tempo;
+  var shareBtn = document.getElementById('shareBtn');
   shareBtn.textContent = score.is_public ? '取消分享' : '分享到广场';
-  shareBtn.className = 'btn' + (score.is_public?' on':'');
-  renderScore(); renderLib();
-  setStatus('已打开：'+score.title); setSaveSt('已保存');
+  shareBtn.className   = 'btn' + (score.is_public ? ' on' : '');
+  renderScore();
+  renderLib();
+  setStatus('已打开：' + (score.title || '未命名'));
+  setSaveSt('已保存');
+  closeMobileLib();
 }
 
-async function saveScore() {
-  if (!score||!currentUser) return;
-  stopAutoSave();
+// silent = true suppresses the toast (used by auto-save)
+async function saveScore(silent) {
+  if (!score || !currentUser) return;
   score.updated_at = new Date().toISOString();
-  const payload = {title:score.title, composer:score.composer, key:score.key,
-    time_sig:score.timeSig||score.time_sig, tempo:score.tempo, measures:score.measures,
-    is_public:score.is_public, updated_at:score.updated_at};
-  const { error } = await sb.from('scores').update(payload).eq('id', activeId);
-  if (error) { toast('保存失败: '+error.message); return; }
-  const idx = myScores.findIndex(s=>s.id===activeId);
-  if (idx>=0) Object.assign(myScores[idx], payload, {id:activeId});
-  dirty=false; setSaveSt('已保存'); renderLib(); toast('已保存');
+  var payload = {
+    title:      score.title,
+    composer:   score.composer,
+    key:        score.key,
+    time_sig:   score.timeSig || score.time_sig,
+    tempo:      score.tempo,
+    measures:   score.measures,
+    is_public:  score.is_public,
+    updated_at: score.updated_at
+  };
+  var r = await sb.from('scores').update(payload).eq('id', activeId);
+  if (r.error) { toast('保存失败: ' + r.error.message); return; }
+  var idx = myScores.findIndex(function(s) { return s.id === activeId; });
+  if (idx >= 0) Object.assign(myScores[idx], payload, {id: activeId});
+  dirty = false;
+  setSaveSt('已保存');
+  renderLib();
+  if (!silent) toast('已保存');
 }
 
 async function toggleShare() {
   if (!score) return;
   score.is_public = !score.is_public;
-  await saveScore();
-  const shareBtn = document.getElementById('shareBtn');
+  await saveScore(false);
+  var shareBtn = document.getElementById('shareBtn');
   shareBtn.textContent = score.is_public ? '取消分享' : '分享到广场';
-  shareBtn.className = 'btn' + (score.is_public?' on':'');
+  shareBtn.className   = 'btn' + (score.is_public ? ' on' : '');
   toast(score.is_public ? '已发布到乐谱广场' : '已从广场撤回');
 }
 
-// ── Delete with confirm modal ──
 function askDelete(id, e) {
   e.stopPropagation();
-  const s = myScores.find(x=>x.id===id);
+  var s = myScores.find(function(x) { return x.id === id; });
   pendingDeleteId = id;
-  document.getElementById('modalScoreName').textContent = '「'+(s?.title||'未命名')+'」';
+  document.getElementById('modalScoreName').textContent = '「' + ((s && s.title) || '未命名') + '」';
   document.getElementById('modalOverlay').classList.add('show');
 }
-function closeModal() { pendingDeleteId=null; document.getElementById('modalOverlay').classList.remove('show'); }
+function closeModal() {
+  pendingDeleteId = null;
+  document.getElementById('modalOverlay').classList.remove('show');
+}
 async function confirmDelete() {
-  const id = pendingDeleteId; closeModal(); if (!id) return;
-  const { error } = await sb.from('scores').delete().eq('id', id);
-  if (error) { toast('删除失败'); return; }
-  myScores = myScores.filter(x=>x.id!==id);
-  if (activeId===id) {
-    activeId=null; score=null; dirty=false;
-    document.getElementById('toolbar').style.display='none';
-    document.getElementById('printBtn').style.display='none';
-    document.getElementById('shareLinkBtn').style.display='none';
-    document.getElementById('scoreContent').innerHTML='<div class="no-score"><div class="no-score-icon">♪</div><div style="font-size:14px">选择左侧乐谱，或点「+ 新建」</div></div>';
+  var id = pendingDeleteId;
+  closeModal();
+  if (!id) return;
+  var r = await sb.from('scores').delete().eq('id', id);
+  if (r.error) { toast('删除失败'); return; }
+  myScores = myScores.filter(function(x) { return x.id !== id; });
+  if (activeId === id) {
+    activeId = null; score = null; dirty = false;
+    undoStack = []; redoStack = [];
+    refreshUndoRedoUI();
+    document.getElementById('toolbar').style.display = 'none';
+    document.getElementById('scoreContent').innerHTML =
+      '<div class="no-score"><div class="no-score-icon">♪</div><div style="font-size:14px">选择左侧乐谱，或点「+ 新建」</div></div>';
   }
-  renderLib(); toast('已删除');
+  renderLib();
+  toast('已删除');
 }
 
 // ══════════════════════════════════════════════
-// Auto-save
+// FIX F2 – Undo / Redo
 // ══════════════════════════════════════════════
-function scheduleAutoSave() {
-  stopAutoSave();
-  autoSaveTimer = setTimeout(async () => {
-    if (dirty && score && currentUser) {
-      setSaveSt('自动保存中…');
-      await saveScore();
-    }
-  }, AUTO_SAVE_DELAY);
+function snapshotForUndo() {
+  undoStack.push({
+    measures: JSON.parse(JSON.stringify(score.measures)),
+    cursor:   {m: cursor.m, n: cursor.n}
+  });
+  if (undoStack.length > UNDO_LIMIT) undoStack.shift();
+  redoStack = []; // new edit invalidates redo history
+  refreshUndoRedoUI();
 }
 
-function stopAutoSave() {
-  if (autoSaveTimer) { clearTimeout(autoSaveTimer); autoSaveTimer = null; }
+function undo() {
+  if (!score || !undoStack.length) return;
+  // Push current state to redo before reverting
+  redoStack.push({
+    measures: JSON.parse(JSON.stringify(score.measures)),
+    cursor:   {m: cursor.m, n: cursor.n}
+  });
+  var snap = undoStack.pop();
+  score.measures = snap.measures;
+  cursor = clampCursor(snap.cursor);
+  markDirty();
+  renderScore();
+  refreshUndoRedoUI();
+}
+
+function redo() {
+  if (!score || !redoStack.length) return;
+  undoStack.push({
+    measures: JSON.parse(JSON.stringify(score.measures)),
+    cursor:   {m: cursor.m, n: cursor.n}
+  });
+  var snap = redoStack.pop();
+  score.measures = snap.measures;
+  cursor = clampCursor(snap.cursor);
+  markDirty();
+  renderScore();
+  refreshUndoRedoUI();
+}
+
+function clampCursor(c) {
+  var m = Math.max(0, Math.min(c.m, score.measures.length - 1));
+  var n = Math.max(0, Math.min(c.n, score.measures[m].notes.length));
+  return {m: m, n: n};
+}
+
+function refreshUndoRedoUI() {
+  var ub = document.getElementById('undoBtn');
+  var rb = document.getElementById('redoBtn');
+  if (!ub || !rb) return;
+  ub.disabled = (undoStack.length === 0);
+  rb.disabled = (redoStack.length === 0);
 }
 
 // ══════════════════════════════════════════════
 // Score Render
 // ══════════════════════════════════════════════
-function isSelected(mi, ni) {
-  return selection.some(s => s.m === mi && s.n === ni);
-}
-
 function renderScore() {
   if (!score) return;
-  const c = document.getElementById('scoreContent');
-  const allEmpty = score.measures.every(m=>m.notes.length===0);
-  let html=`<div style="text-align:center;margin-bottom:10px">
-    <input class="score-title-input" placeholder="乐曲标题" value="${esc(score.title)}"
-      oninput="score.title=this.value;markDirty();renderLib()">
-    <br><input class="score-comp-input" placeholder="作曲 / 编曲" value="${esc(score.composer||'')}"
-      oninput="score.composer=this.value;markDirty()">
-  </div>
-  <div class="score-meta-row">
-    <span>1=${score.key}</span><span>${score.timeSig||score.time_sig}</span><span>♩=${score.tempo}</span>
-  </div>`;
+  var c = document.getElementById('scoreContent');
+  var allEmpty = score.measures.every(function(m) { return m.notes.length === 0; });
+
+  var html = '<div style="text-align:center;margin-bottom:10px">'
+    + '<input class="score-title-input" placeholder="乐曲标题" value="' + esc(score.title) + '"'
+    + ' oninput="score.title=this.value;markDirty();renderLib()">'
+    + '<br><input class="score-comp-input" placeholder="作曲 / 编曲" value="' + esc(score.composer || '') + '"'
+    + ' oninput="score.composer=this.value;markDirty()">'
+    + '</div>'
+    + '<div class="score-meta-row">'
+    + '<span>1=' + score.key + '</span>'
+    + '<span>' + (score.timeSig || score.time_sig) + '</span>'
+    + '<span>♩=' + score.tempo + '</span>'
+    + '</div>';
+
   if (allEmpty) {
-    html+='<div class="score-empty">使用下方键盘输入第一个音符<br>↵ 按钮可换行</div>';
+    html += '<div class="score-empty">使用下方键盘输入第一个音符<br>↵ 按钮可换行</div>';
   } else {
-    // Split measures into rows using linebreak flags
-    const rows = [];
-    let currentRow = [];
-    score.measures.forEach((m, mi) => {
-      currentRow.push(mi);
-      if (m.linebreak) { rows.push(currentRow); currentRow = []; }
-    });
-    if (currentRow.length) rows.push(currentRow);
-
-    rows.forEach(rowMeasures => {
-      html+='<div class="staff-line">';
-      rowMeasures.forEach(mi => {
-        const m=score.measures[mi],isCur=mi===cursor.m;
-        html+=`<div class="measure${isCur?' cur-m':''}" onclick="clickMeasure(${mi},event)">
-          <span class="mnum">${mi+1}</span><div class="notes-row">`;
-        if(!m.notes.length){
-          if(isCur&&cursor.n===0) html+='<span class="cursor-end-beam"></span>';
-          html+='<span class="empty-m">空</span>';
+    buildRows(score.measures).forEach(function(rowMeasures) {
+      html += '<div class="staff-line">';
+      rowMeasures.forEach(function(mi) {
+        var m    = score.measures[mi];
+        var isCur = (mi === cursor.m);
+        html += '<div class="measure' + (isCur ? ' cur-m' : '') + '" onclick="clickMeasure(' + mi + ',event)">'
+          + '<span class="mnum">' + (mi + 1) + '</span>'
+          + '<div class="notes-row">';
+        if (!m.notes.length) {
+          if (isCur && cursor.n === 0) html += '<span class="cursor-end-beam"></span>';
+          html += '<span class="empty-m">空</span>';
         } else {
-          m.notes.forEach((n,ni)=>{ html+=renderNote(n,mi,ni,isCur&&cursor.n===ni,isSelected(mi,ni)); });
-          if(isCur&&cursor.n===m.notes.length) html+='<span class="cursor-end-beam"></span>';
+          m.notes.forEach(function(n, ni) {
+            html += renderNote(n, mi, ni, isCur && cursor.n === ni);
+          });
+          if (isCur && cursor.n === m.notes.length) html += '<span class="cursor-end-beam"></span>';
         }
-        html+=`</div></div>`;
+        html += '</div></div>';
       });
-      const lastMi = rowMeasures[rowMeasures.length-1];
-      if(score.measures[lastMi]?.linebreak){
-        html+=`<div class="linebreak-mark"><span style="cursor:pointer;padding:2px 5px;border-radius:3px"
-          onmouseover="this.style.color='#c0392b'" onmouseout="this.style.color=''"
-          onclick="removeLinebreak(${lastMi})">↵×</span></div>`;
+      var lastMi = rowMeasures[rowMeasures.length - 1];
+      if (score.measures[lastMi] && score.measures[lastMi].linebreak) {
+        html += '<div class="linebreak-mark">'
+          + '<span style="cursor:pointer;padding:2px 5px;border-radius:3px"'
+          + ' onmouseover="this.style.color=\'#c0392b\'" onmouseout="this.style.color=\'\'"'
+          + ' onclick="removeLinebreak(' + lastMi + ')">↵×</span></div>';
       }
-      html+='</div>';
+      html += '</div>';
     });
   }
-  c.innerHTML=html;
-  updateSelectionStatus();
+  c.innerHTML = html;
 }
 
-function updateSelectionStatus() {
-  if (selection.length > 0) {
-    setStatus(`已选中 ${selection.length} 个音符 · Ctrl+C 复制 · Del 删除选中`);
-  }
+// Shared helper: group measure indices into visual rows respecting linebreak flags
+function buildRows(measures) {
+  var rows = [];
+  var cur  = [];
+  measures.forEach(function(m, mi) {
+    cur.push(mi);
+    if (m.linebreak) { rows.push(cur); cur = []; }
+  });
+  if (cur.length) rows.push(cur);
+  return rows;
 }
 
-function renderNote(n,mi,ni,cursorBefore,selected){
-  const acc=n.acc===1?'#':n.acc===-1?'b':'';
-  const isRest=n.num==='0';
-  let tD='',bD='';
-  if(n.octave>0)for(let i=0;i<n.octave;i++)tD+='<div class="odot"></div>';
-  if(n.octave<0)for(let i=0;i<-n.octave;i++)bD+='<div class="odot"></div>';
-  let ul='';
-  if(n.dur==='e')ul='<div class="nul"></div>';
-  if(n.dur==='s')ul='<div class="nul"></div><div class="nul"></div>';
-  return `<div class="note-cell${cursorBefore?' cursor-before':''}${selected?' sel':''}" onclick="clickNote(event,${mi},${ni})">
-    ${n.tie?'<span class="tiemark">⌢</span>':''}
-    <div class="nc-inner">
-      <div class="ndots-t">${tD}</div>
-      <div class="nnum${isRest?' rest':''}">${acc}${isRest?'—':n.num}${n.aug?'<span class="augdot"></span>':''}</div>
-      <div class="nul-wrap">${ul}</div>
-      <div class="ndots-b">${bD}</div>
-    </div>
-  </div>`;
+function renderNote(n, mi, ni, cursorBefore) {
+  var acc    = (n.acc === 1) ? '#' : (n.acc === -1) ? 'b' : '';
+  var isRest = (n.num === '0');
+  var tD = '', bD = '';
+  for (var i = 0; i < n.octave;  i++) tD += '<div class="odot"></div>';
+  for (var i = 0; i < -n.octave; i++) bD += '<div class="odot"></div>';
+  var ul = '';
+  if (n.dur === 'e') ul = '<div class="nul"></div>';
+  if (n.dur === 's') ul = '<div class="nul"></div><div class="nul"></div>';
+  return '<div class="note-cell' + (cursorBefore ? ' cursor-before' : '') + '" onclick="clickNote(event,' + mi + ',' + ni + ')">'
+    + (n.tie ? '<span class="tiemark">⌢</span>' : '')
+    + '<div class="nc-inner">'
+    + '<div class="ndots-t">' + tD + '</div>'
+    + '<div class="nnum' + (isRest ? ' rest' : '') + '">' + acc + (isRest ? '—' : n.num) + (n.aug ? '<span class="augdot"></span>' : '') + '</div>'
+    + '<div class="nul-wrap">' + ul + '</div>'
+    + '<div class="ndots-b">' + bD + '</div>'
+    + '</div></div>';
 }
 
-function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
+function esc(s) {
+  return (s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
 
 // ══════════════════════════════════════════════
-// Edit ops
+// Edit operations (each mutable op calls snapshotForUndo first)
 // ══════════════════════════════════════════════
 function clickNote(e, mi, ni) {
   e.stopPropagation();
-  const rect = e.currentTarget.getBoundingClientRect();
-  const newPos = e.clientX < rect.left + rect.width / 2 ? ni : ni + 1;
-
-  if (e.shiftKey && selAnchor !== null) {
-    // Shift-click: range selection from anchor to current note
-    const anchor = selAnchor;
-    selection = [];
-    // Flatten all notes
-    const flat = [];
-    score.measures.forEach((m, mIdx) => m.notes.forEach((n, nIdx) => flat.push({m:mIdx, n:nIdx})));
-    const anchorFlat = flat.findIndex(p => p.m === anchor.m && p.n === anchor.n);
-    const curFlat = flat.findIndex(p => p.m === mi && p.n === ni);
-    if (anchorFlat >= 0 && curFlat >= 0) {
-      const lo = Math.min(anchorFlat, curFlat);
-      const hi = Math.max(anchorFlat, curFlat);
-      selection = flat.slice(lo, hi + 1);
-    }
-  } else if (e.ctrlKey || e.metaKey) {
-    // Ctrl-click: toggle individual note
-    const idx = selection.findIndex(s => s.m === mi && s.n === ni);
-    if (idx >= 0) selection.splice(idx, 1);
-    else { selection.push({m:mi, n:ni}); selAnchor = {m:mi, n:ni}; }
-  } else {
-    // Normal click: move cursor, clear selection
-    selection = [];
-    selAnchor = {m:mi, n:ni};
-    moveCursorTo(mi, newPos);
-    return;
-  }
-  renderScore();
+  var rect = e.currentTarget.getBoundingClientRect();
+  moveCursorTo(mi, e.clientX < rect.left + rect.width / 2 ? ni : ni + 1);
 }
-
-function clickMeasure(mi,e){
-  if(e.target.classList.contains('note-cell')||e.target.closest('.note-cell'))return;
-  selection=[];selAnchor=null;
-  moveCursorTo(mi,score.measures[mi].notes.length);
+function clickMeasure(mi, e) {
+  if (e.target.classList.contains('note-cell') || e.target.closest('.note-cell')) return;
+  moveCursorTo(mi, score.measures[mi].notes.length);
 }
-function moveCursorTo(mi,ni){cursor.m=mi;cursor.n=ni;renderScore();}
+function moveCursorTo(mi, ni) { cursor.m = mi; cursor.n = ni; renderScore(); }
 
-function ins(num){
-  if(!score)return;
-  selection=[];
-  score.measures[cursor.m].notes.splice(cursor.n,0,{num,dur:curDur,octave:curOct,aug:curAug,tie:false,acc:curAcc});
+function ins(num) {
+  if (!score) return;
+  snapshotForUndo();
+  score.measures[cursor.m].notes.splice(cursor.n, 0, {
+    num: num, dur: curDur, octave: curOct, aug: curAug, tie: false, acc: curAcc
+  });
   cursor.n++;
-  markDirty();renderScore();
-}
-
-function insBar(){if(!score)return;const m=score.measures[cursor.m];const after=m.notes.splice(cursor.n);const lb=m.linebreak;m.linebreak=false;score.measures.splice(cursor.m+1,0,{notes:after,linebreak:lb});cursor.m++;cursor.n=0;markDirty();renderScore();}
-
-function insLineBreak(){
-  if(!score)return;
-  const m=score.measures[cursor.m];
-  if(cursor.n<m.notes.length){
-    const targetMi=cursor.m;
-    insBar();
-    score.measures[targetMi].linebreak=true;
-  } else {
-    score.measures[cursor.m].linebreak=true;
-  }
-  markDirty();renderScore();
-}
-
-function removeLinebreak(mi){if(!score)return;score.measures[mi].linebreak=false;markDirty();renderScore();}
-
-function delSel(){
-  if(!score)return;
-  // If there's a multi-selection, delete all selected notes
-  if(selection.length>0){
-    deleteSelectedNotes();
-    return;
-  }
-  const m=score.measures[cursor.m];
-  if(cursor.n>0){m.notes.splice(cursor.n-1,1);cursor.n--;markDirty();renderScore();}
-  else if(cursor.m>0){const prev=score.measures[cursor.m-1];const pos=prev.notes.length;prev.notes=prev.notes.concat(m.notes);prev.linebreak=m.linebreak;score.measures.splice(cursor.m,1);cursor.m--;cursor.n=pos;markDirty();renderScore();}
-}
-
-function deleteSelectedNotes(){
-  if(!score||selection.length===0)return;
-  // Sort descending to safely splice
-  const sorted=[...selection].sort((a,b)=> a.m!==b.m ? b.m-a.m : b.n-a.n);
-  sorted.forEach(({m,n})=>{ score.measures[m].notes.splice(n,1); });
-  selection=[];selAnchor=null;
-  // Adjust cursor
-  cursor.m=Math.min(cursor.m,score.measures.length-1);
-  cursor.n=Math.min(cursor.n,score.measures[cursor.m].notes.length);
-  markDirty();renderScore();
-  toast(`已删除 ${sorted.length} 个音符`);
-}
-
-function delForward(){if(!score)return;const m=score.measures[cursor.m];if(cursor.n<m.notes.length){m.notes.splice(cursor.n,1);markDirty();renderScore();}else if(cursor.m<score.measures.length-1){const next=score.measures[cursor.m+1];m.notes=m.notes.concat(next.notes);m.linebreak=next.linebreak;score.measures.splice(cursor.m+1,1);markDirty();renderScore();}}
-
-function moveCursorLeft(){if(!score)return;if(cursor.n>0)cursor.n--;else if(cursor.m>0){cursor.m--;cursor.n=score.measures[cursor.m].notes.length;}renderScore();}
-function moveCursorRight(){if(!score)return;const m=score.measures[cursor.m];if(cursor.n<m.notes.length)cursor.n++;else if(cursor.m<score.measures.length-1){cursor.m++;cursor.n=0;}renderScore();}
-function addMeasure(){if(!score)return;score.measures.push({notes:[],linebreak:false});cursor.m=score.measures.length-1;cursor.n=0;markDirty();renderScore();}
-function deleteLast(){if(!score||score.measures.length<=1)return;score.measures.pop();cursor.m=Math.min(cursor.m,score.measures.length-1);cursor.n=Math.min(cursor.n,score.measures[cursor.m].notes.length);markDirty();renderScore();}
-function adjOct(d){curOct=Math.max(-2,Math.min(2,curOct+d));document.getElementById('octDisp').textContent=['超低','低','中','高','超高'][curOct+2];}
-function togAug(){curAug=!curAug;document.getElementById('augBtn').className='btn'+(curAug?' on':'');}
-function togAcc(v){curAcc=curAcc===v?0:v;document.getElementById('shBtn').className='btn'+(curAcc===1?' on':'');document.getElementById('flBtn').className='btn'+(curAcc===-1?' on':'');}
-function setKey(k){if(score){score.key=k;markDirty();renderScore();}}
-function setTimeSig(v){if(score){score.timeSig=v;markDirty();renderScore();}}
-function setTempo(v){if(score){score.tempo=parseInt(v);document.getElementById('tempoVal').textContent=v;markDirty();}}
-function markDirty(){dirty=true;setSaveSt('未保存 ●');scheduleAutoSave();}
-function setSaveSt(s){document.getElementById('saveSt').textContent=s;}
-function setStatus(m){document.getElementById('statusMsg').textContent=m;}
-
-// ── Copy / Paste ──
-function copySelection() {
-  if (!score) return;
-  let notesToCopy = [];
-  if (selection.length > 0) {
-    // Copy selected notes (in order)
-    const sorted = [...selection].sort((a,b) => a.m!==b.m ? a.m-b.m : a.n-b.n);
-    notesToCopy = sorted.map(({m,n}) => JSON.parse(JSON.stringify(score.measures[m].notes[n])));
-  } else {
-    // Copy the note at cursor (if any)
-    const m = score.measures[cursor.m];
-    if (cursor.n < m.notes.length) {
-      notesToCopy = [JSON.parse(JSON.stringify(m.notes[cursor.n]))];
-    }
-  }
-  if (!notesToCopy.length) { toast('没有可复制的音符'); return; }
-  clipboard = notesToCopy;
-  toast(`已复制 ${clipboard.length} 个音符`);
-}
-
-function pasteNotes() {
-  if (!score || !clipboard.length) { toast('剪贴板为空'); return; }
-  const copies = clipboard.map(n => JSON.parse(JSON.stringify(n)));
-  copies.forEach((n, i) => {
-    score.measures[cursor.m].notes.splice(cursor.n + i, 0, n);
-  });
-  cursor.n += copies.length;
-  selection = [];
-  markDirty(); renderScore();
-  toast(`已粘贴 ${copies.length} 个音符`);
-}
-
-// Keyboard
-document.addEventListener('keydown',e=>{
-  if(!score)return;
-  const tag=e.target.tagName;
-  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
-
-  if((e.ctrlKey||e.metaKey)&&e.key==='s'){saveScore();e.preventDefault();return;}
-  if((e.ctrlKey||e.metaKey)&&e.key==='c'){copySelection();e.preventDefault();return;}
-  if((e.ctrlKey||e.metaKey)&&e.key==='v'){pasteNotes();e.preventDefault();return;}
-  if((e.ctrlKey||e.metaKey)&&e.key==='a'){selectAll();e.preventDefault();return;}
-
-  if('1234567'.includes(e.key)){ins(e.key);e.preventDefault();}
-  else if(e.key==='0'){ins('0');e.preventDefault();}
-  else if(e.key==='ArrowUp'){adjOct(1);e.preventDefault();}
-  else if(e.key==='ArrowDown'){adjOct(-1);e.preventDefault();}
-  else if(e.key==='ArrowLeft'){selection=[];moveCursorLeft();e.preventDefault();}
-  else if(e.key==='ArrowRight'){selection=[];moveCursorRight();e.preventDefault();}
-  else if(e.key==='Backspace'){delSel();e.preventDefault();}
-  else if(e.key==='Delete'){
-    if(selection.length>0)deleteSelectedNotes();
-    else delForward();
-    e.preventDefault();
-  }
-  else if(e.key===' '){togglePlay();e.preventDefault();}
-  else if(e.key==='Enter'&&!e.shiftKey){insBar();e.preventDefault();}
-  else if(e.key==='Enter'&&e.shiftKey){insLineBreak();e.preventDefault();}
-  else if(e.key==='Escape'){selection=[];selAnchor=null;renderScore();e.preventDefault();}
-});
-
-function selectAll() {
-  if (!score) return;
-  selection = [];
-  score.measures.forEach((m, mi) => m.notes.forEach((n, ni) => selection.push({m:mi, n:ni})));
+  markDirty();
   renderScore();
-  toast(`已全选 ${selection.length} 个音符`);
 }
 
-// ══════════════════════════════════════════════
-// Print
-// ══════════════════════════════════════════════
-function printScore() {
+function insBar() {
   if (!score) return;
-  window.print();
+  snapshotForUndo();
+  var m     = score.measures[cursor.m];
+  var after = m.notes.splice(cursor.n);
+  var lb    = m.linebreak;
+  m.linebreak = false;
+  score.measures.splice(cursor.m + 1, 0, {notes: after, linebreak: lb});
+  cursor.m++;
+  cursor.n = 0;
+  markDirty();
+  renderScore();
 }
 
-// ══════════════════════════════════════════════
-// Share Link
-// ══════════════════════════════════════════════
-function openShareModal() {
+function insLineBreak() {
   if (!score) return;
-  const modal = document.getElementById('shareModalOverlay');
-  const input = document.getElementById('shareLinkInput');
-  const note = document.getElementById('shareModalNote');
-
-  if (score.is_public) {
-    const link = `${window.location.origin}${window.location.pathname}?score=${activeId}`;
-    input.value = link;
-    note.innerHTML = '✅ 此乐谱已公开，任何人可通过链接查看并播放。<br>可直接分享给朋友！';
-  } else {
-    input.value = '（乐谱未公开，无法生成分享链接）';
-    note.innerHTML = '⚠️ 请先点击「分享到广场」将乐谱设为公开，才能生成有效的分享链接。';
+  snapshotForUndo();
+  var m = score.measures[cursor.m];
+  // Split measure at cursor if not at end
+  if (cursor.n < m.notes.length) {
+    var after = m.notes.splice(cursor.n);
+    var lb    = m.linebreak;
+    m.linebreak = false;
+    score.measures.splice(cursor.m + 1, 0, {notes: after, linebreak: lb});
+    cursor.m++;
+    cursor.n = 0;
   }
-  modal.classList.add('show');
+  var prev = cursor.m - 1;
+  if (prev >= 0) score.measures[prev].linebreak = true;
+  markDirty();
+  renderScore();
 }
 
-function closeShareModal() {
-  document.getElementById('shareModalOverlay').classList.remove('show');
+function removeLinebreak(mi) {
+  if (!score) return;
+  snapshotForUndo();
+  score.measures[mi].linebreak = false;
+  markDirty();
+  renderScore();
 }
 
-function copyShareLink() {
-  const input = document.getElementById('shareLinkInput');
-  if (!score?.is_public) { toast('请先将乐谱设为公开'); return; }
-  navigator.clipboard.writeText(input.value).then(() => toast('链接已复制到剪贴板')).catch(() => {
-    input.select(); document.execCommand('copy'); toast('链接已复制');
-  });
-}
-
-// Open a preview by score id (for shared links)
-async function openPreviewById(scoreId) {
-  // Try in already-loaded plazaScores first
-  let s = plazaScores.find(x => x.id === scoreId);
-  if (!s) {
-    const { data } = await sb.from('public_scores')
-      .select('id,title,composer,key,time_sig,tempo,measures,play_count,updated_at,user_id,author,fav_count')
-      .eq('id', scoreId).single();
-    if (data) { s = data; plazaScores.push(data); }
+function delSel() {
+  if (!score) return;
+  var m = score.measures[cursor.m];
+  if (cursor.n > 0) {
+    snapshotForUndo();
+    m.notes.splice(cursor.n - 1, 1);
+    cursor.n--;
+    markDirty();
+    renderScore();
+  } else if (cursor.m > 0) {
+    snapshotForUndo();
+    var prev = score.measures[cursor.m - 1];
+    var pos  = prev.notes.length;
+    prev.notes     = prev.notes.concat(m.notes);
+    prev.linebreak = m.linebreak;
+    score.measures.splice(cursor.m, 1);
+    cursor.m--;
+    cursor.n = pos;
+    markDirty();
+    renderScore();
   }
-  if (s) openPreview(s.id);
 }
+
+function delForward() {
+  if (!score) return;
+  var m = score.measures[cursor.m];
+  if (cursor.n < m.notes.length) {
+    snapshotForUndo();
+    m.notes.splice(cursor.n, 1);
+    markDirty();
+    renderScore();
+  } else if (cursor.m < score.measures.length - 1) {
+    snapshotForUndo();
+    var next = score.measures[cursor.m + 1];
+    m.notes     = m.notes.concat(next.notes);
+    m.linebreak = next.linebreak;
+    score.measures.splice(cursor.m + 1, 1);
+    markDirty();
+    renderScore();
+  }
+}
+
+function moveCursorLeft() {
+  if (!score) return;
+  if (cursor.n > 0) {
+    cursor.n--;
+  } else if (cursor.m > 0) {
+    cursor.m--;
+    cursor.n = score.measures[cursor.m].notes.length;
+  }
+  renderScore();
+}
+
+function moveCursorRight() {
+  if (!score) return;
+  var m = score.measures[cursor.m];
+  if (cursor.n < m.notes.length) {
+    cursor.n++;
+  } else if (cursor.m < score.measures.length - 1) {
+    cursor.m++;
+    cursor.n = 0;
+  }
+  renderScore();
+}
+
+function addMeasure() {
+  if (!score) return;
+  snapshotForUndo();
+  score.measures.push({notes: [], linebreak: false});
+  cursor.m = score.measures.length - 1;
+  cursor.n = 0;
+  markDirty();
+  renderScore();
+}
+
+function deleteLast() {
+  if (!score || score.measures.length <= 1) return;
+  snapshotForUndo();
+  score.measures.pop();
+  cursor.m = Math.min(cursor.m, score.measures.length - 1);
+  cursor.n = Math.min(cursor.n, score.measures[cursor.m].notes.length);
+  markDirty();
+  renderScore();
+}
+
+function adjOct(d) {
+  curOct = Math.max(-2, Math.min(2, curOct + d));
+  document.getElementById('octDisp').textContent = ['超低','低','中','高','超高'][curOct + 2];
+}
+
+function togAug() {
+  curAug = !curAug;
+  document.getElementById('augBtn').className = 'btn' + (curAug ? ' on' : '');
+}
+
+function togAcc(v) {
+  curAcc = (curAcc === v) ? 0 : v;
+  document.getElementById('shBtn').className = 'btn' + (curAcc === 1  ? ' on' : '');
+  document.getElementById('flBtn').className = 'btn' + (curAcc === -1 ? ' on' : '');
+}
+
+function setKey(k) {
+  if (score) { score.key = k; markDirty(); renderScore(); }
+}
+function setTimeSig(v) {
+  if (score) { score.timeSig = v; markDirty(); renderScore(); }
+}
+function setTempo(v) {
+  if (score) { score.tempo = parseInt(v, 10); document.getElementById('tempoVal').textContent = v; markDirty(); }
+}
+function markDirty()  { dirty = true; setSaveSt('未保存 ●'); }
+function setSaveSt(s) { document.getElementById('saveSt').textContent = s; }
+function setStatus(m) { document.getElementById('statusMsg').textContent = m; }
+
+// ══════════════════════════════════════════════
+// Keyboard shortcuts
+// ══════════════════════════════════════════════
+document.addEventListener('keydown', function(e) {
+  if (!score) return;
+  var tag = e.target.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+  var key  = e.key;
+  var ctrl = e.ctrlKey || e.metaKey;
+
+  if ('1234567'.indexOf(key) !== -1) { ins(key); e.preventDefault(); return; }
+  if (key === '0')          { ins('0');          e.preventDefault(); return; }
+  if (key === 'ArrowUp')    { adjOct(1);          e.preventDefault(); return; }
+  if (key === 'ArrowDown')  { adjOct(-1);         e.preventDefault(); return; }
+  if (key === 'ArrowLeft')  { moveCursorLeft();   e.preventDefault(); return; }
+  if (key === 'ArrowRight') { moveCursorRight();  e.preventDefault(); return; }
+  if (key === 'Backspace')  { delSel();           e.preventDefault(); return; }
+  if (key === 'Delete')     { delForward();       e.preventDefault(); return; }
+  if (key === ' ')          { togglePlay();       e.preventDefault(); return; }
+  if (key === 'Enter' && !e.shiftKey) { insBar();        e.preventDefault(); return; }
+  if (key === 'Enter' &&  e.shiftKey) { insLineBreak();  e.preventDefault(); return; }
+  if (ctrl && key === 's') { saveScore(false); e.preventDefault(); return; }
+  // FIX F2 keyboard
+  if (ctrl && !e.shiftKey && (key === 'z' || key === 'Z')) { undo(); e.preventDefault(); return; }
+  if (ctrl && ( e.shiftKey && (key === 'z' || key === 'Z') || (key === 'y' || key === 'Y') )) {
+    redo(); e.preventDefault(); return;
+  }
+});
 
 // ══════════════════════════════════════════════
 // Playback
 // ══════════════════════════════════════════════
-function noteFreq(n,key){if(n.num==='0')return 0;const i=parseInt(n.num)-1;const st=(SCALE[key]||SCALE.C)[i]+n.octave*12+n.acc;return 261.63*Math.pow(2,st/12);}
-function getACtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
-function playMeasures(measures,key,tempo,onEnd){
-  const ctx=getACtx(),bd=60/tempo,dm={w:4,h:2,q:1,e:.5,s:.25};
-  let t=ctx.currentTime+.1;
-  measures.forEach(m=>m.notes.forEach(n=>{
-    let beats=(dm[n.dur]||1)*(n.aug?1.5:1),d=beats*bd,f=noteFreq(n,key);
-    if(f>0){const osc=ctx.createOscillator(),g=ctx.createGain();osc.connect(g);g.connect(ctx.destination);osc.type='triangle';osc.frequency.value=f;g.gain.setValueAtTime(.4,t);g.gain.exponentialRampToValueAtTime(.001,t+d*.88);osc.start(t);osc.stop(t+d);}
-    t+=d;
-  }));
-  return setTimeout(onEnd,(t-ctx.currentTime)*1000);
+function noteFreq(n, key) {
+  if (n.num === '0') return 0;
+  var i  = parseInt(n.num, 10) - 1;
+  var st = (SCALE[key] || SCALE.C)[i] + n.octave * 12 + n.acc;
+  return 261.63 * Math.pow(2, st / 12);
 }
-function togglePlay(){
-  if(!score)return;
-  if(playing){stopPlay();return;}
-  playing=true;
-  const b=document.getElementById('playBtn');b.textContent='■ 停止';b.style.background='#c0392b';b.style.borderColor='#c0392b';
-  playTimer=playMeasures(score.measures,score.key,score.tempo,()=>{playing=false;resetPlay();});
+
+function getACtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
 }
-function stopPlay(){playing=false;if(playTimer)clearTimeout(playTimer);if(audioCtx){audioCtx.close();audioCtx=null;}resetPlay();}
-function resetPlay(){const b=document.getElementById('playBtn');if(!b)return;b.textContent='▶ 播放';b.className='btn play';b.style.background='';b.style.borderColor='';}
+
+function playMeasures(measures, key, tempo, onEnd) {
+  var ctx = getACtx();
+  var bd  = 60 / tempo;
+  var dm  = {w:4, h:2, q:1, e:0.5, s:0.25};
+  var t   = ctx.currentTime + 0.1;
+  measures.forEach(function(m) {
+    m.notes.forEach(function(n) {
+      var beats = (dm[n.dur] || 1) * (n.aug ? 1.5 : 1);
+      var d = beats * bd;
+      var f = noteFreq(n, key);
+      if (f > 0) {
+        var osc = ctx.createOscillator();
+        var g   = ctx.createGain();
+        osc.connect(g); g.connect(ctx.destination);
+        osc.type = 'triangle';
+        osc.frequency.value = f;
+        g.gain.setValueAtTime(0.4, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + d * 0.88);
+        osc.start(t); osc.stop(t + d);
+      }
+      t += d;
+    });
+  });
+  return setTimeout(onEnd, (t - ctx.currentTime) * 1000);
+}
+
+function togglePlay() {
+  if (!score) return;
+  if (playing) { stopPlay(); return; }
+  playing = true;
+  var b = document.getElementById('playBtn');
+  b.textContent = '■ 停止'; b.style.background = '#c0392b'; b.style.borderColor = '#c0392b';
+  playTimer = playMeasures(score.measures, score.key, score.tempo, function() {
+    playing = false; resetPlay();
+  });
+}
+
+function stopPlay() {
+  playing = false;
+  if (playTimer) clearTimeout(playTimer);
+  if (audioCtx) { audioCtx.close(); audioCtx = null; }
+  resetPlay();
+}
+
+function resetPlay() {
+  var b = document.getElementById('playBtn');
+  if (!b) return;
+  b.textContent = '▶ 播放'; b.className = 'btn play'; b.style.background = ''; b.style.borderColor = '';
+}
 
 // ══════════════════════════════════════════════
-// Plaza
+// FIX F3 – Export as PNG (via html2canvas)
 // ══════════════════════════════════════════════
-let plazaSearchTimer=null;
-function debounceSearch(){clearTimeout(plazaSearchTimer);plazaSearchTimer=setTimeout(loadPlaza,400);}
+async function exportScoreAsPng() {
+  if (!score) return;
+  if (!window.html2canvas) {
+    toast('正在加载导出库…');
+    await new Promise(function(resolve, reject) {
+      var s   = document.createElement('script');
+      s.src   = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      s.onload  = resolve;
+      s.onerror = function() { reject(new Error('html2canvas 加载失败')); };
+      document.head.appendChild(s);
+    }).catch(function(err) { toast(err.message); return null; });
+    if (!window.html2canvas) return;
+  }
+  toast('正在生成图片…');
+  var el = document.querySelector('.score-paper');
+  try {
+    var canvas = await window.html2canvas(el, {
+      backgroundColor: '#ffffff',
+      scale:  2,
+      useCORS: true,
+      logging: false
+    });
+    var link = document.createElement('a');
+    link.download = (score.title || '乐谱') + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    toast('导出成功');
+  } catch (err) {
+    toast('导出失败: ' + err.message);
+  }
+}
 
-async function loadPlaza() {
-  const q = document.getElementById('plazaSearch').value.trim();
-  const grid = document.getElementById('plazaGrid');
-  grid.innerHTML = '<div class="plaza-empty"><div class="spinner"></div></div>';
+// ══════════════════════════════════════════════
+// FIX F4 – Plaza: infinite scroll
+// FIX B2 – Preview: uses buildRows for linebreak support
+// ══════════════════════════════════════════════
+function debounceSearch() {
+  clearTimeout(plazaSearchTimer);
+  plazaSearchTimer = setTimeout(resetAndLoadPlaza, 400);
+}
 
-  let query = sb.from('public_scores')
+function resetAndLoadPlaza() {
+  plazaPage    = 0;
+  plazaHasMore = true;
+  plazaScores  = [];
+  disconnectObserver();
+  document.getElementById('plazaGrid').innerHTML =
+    '<div class="plaza-empty"><div class="spinner"></div></div>';
+  loadMorePlaza();
+}
+
+async function loadMorePlaza() {
+  if (plazaLoading || !plazaHasMore) return;
+  plazaLoading = true;
+
+  var q    = document.getElementById('plazaSearch').value.trim();
+  var from = plazaPage * PLAZA_PAGE_SZ;
+  var to   = from + PLAZA_PAGE_SZ - 1;
+
+  var query = sb.from('public_scores')
     .select('id,title,composer,key,time_sig,tempo,measures,play_count,updated_at,user_id,author,fav_count')
-    .order('updated_at', {ascending:false})
-    .limit(60);
+    .order('updated_at', {ascending: false})
+    .range(from, to);
 
-  if (q) query = query.or(`title.ilike.%${q}%,composer.ilike.%${q}%,author.ilike.%${q}%`);
+  if (q) {
+    query = query.or('title.ilike.%' + q + '%,composer.ilike.%' + q + '%,author.ilike.%' + q + '%');
+  }
 
-  const { data, error } = await query;
-  if (error) { grid.innerHTML=`<div class="plaza-empty">加载失败: ${error.message}</div>`; return; }
-  plazaScores = data || [];
+  var r = await query;
+  plazaLoading = false;
+
+  if (r.error) { toast('加载失败: ' + r.error.message); return; }
+
+  var batch    = r.data || [];
+  plazaScores  = plazaScores.concat(batch);
+  plazaHasMore = (batch.length === PLAZA_PAGE_SZ);
+  plazaPage++;
+
   renderPlaza();
-}
-
-function toggleFavFilter() {
-  favFilterOn = !favFilterOn;
-  const btn = document.getElementById('favFilterBtn');
-  btn.className = 'btn' + (favFilterOn ? ' fav-filter-on' : '');
-  btn.textContent = favFilterOn ? '♥ 我的收藏（已筛选）' : '♥ 我的收藏';
-  renderPlaza();
+  if (plazaHasMore) setupObserver();
 }
 
 function renderPlaza() {
-  const grid = document.getElementById('plazaGrid');
-  const list = favFilterOn ? plazaScores.filter(s => myFavIds.has(s.id)) : plazaScores;
-  if (!list.length) {
-    grid.innerHTML = favFilterOn
-      ? '<div class="plaza-empty">你还没有收藏任何乐谱<br>点击卡片右上角 ♡ 即可收藏</div>'
-      : '<div class="plaza-empty">暂无乐谱，快去编辑器发布第一首吧！</div>';
+  var grid = document.getElementById('plazaGrid');
+  if (!plazaScores.length) {
+    grid.innerHTML = '<div class="plaza-empty">暂无乐谱，快去编辑器发布第一首吧！</div>';
     return;
   }
-  grid.innerHTML = list.map(s => {
-    const isFav = myFavIds.has(s.id);
-    const isOwn = currentUser && s.user_id === currentUser.id;
-    const d = new Date(s.updated_at);
-    const ds = `${d.getMonth()+1}/${d.getDate()}`;
-    return `<div class="plaza-card" onclick="openPreview('${s.id}')">
-      <button class="fav-btn${isFav?' active':''}" onclick="toggleFav('${s.id}',event)" title="${isFav?'取消收藏':'收藏'}">${isFav?'♥':'♡'}</button>
-      <div class="plaza-card-title" title="${esc(s.title)}">${esc(s.title)||'未命名'}</div>
-      <div class="plaza-card-composer">${esc(s.composer)||'—'}</div>
-      <div class="plaza-card-meta">
-        <span class="plaza-card-author">by ${esc(s.author)}${isOwn?' (我)':''}</span>
-        <span>1=${s.key}</span>
-        <span>♥ ${s.fav_count}</span>
-        <span>${ds}</span>
-      </div>
-    </div>`;
+  var cardsHtml = plazaScores.map(function(s) {
+    var isFav = myFavIds.has(s.id);
+    var isOwn = currentUser && s.user_id === currentUser.id;
+    var d  = new Date(s.updated_at);
+    var ds = (d.getMonth()+1) + '/' + d.getDate();
+    return '<div class="plaza-card" onclick="openPreview(\'' + s.id + '\')">'
+      + '<button class="fav-btn' + (isFav ? ' active' : '') + '" onclick="toggleFav(\'' + s.id + '\',event)" title="' + (isFav ? '取消收藏' : '收藏') + '">' + (isFav ? '♥' : '♡') + '</button>'
+      + '<div class="plaza-card-title" title="' + esc(s.title) + '">' + (esc(s.title) || '未命名') + '</div>'
+      + '<div class="plaza-card-composer">' + (esc(s.composer) || '—') + '</div>'
+      + '<div class="plaza-card-meta">'
+      + '<span class="plaza-card-author">by ' + esc(s.author) + (isOwn ? ' (我)' : '') + '</span>'
+      + '<span>1=' + s.key + '</span>'
+      + '<span>♥ ' + s.fav_count + '</span>'
+      + '<span>' + ds + '</span>'
+      + '</div></div>';
   }).join('');
+
+  var sentinelHtml = plazaHasMore ? '<div class="plaza-sentinel" id="plazaSentinel"></div>' : '';
+  grid.innerHTML = cardsHtml + sentinelHtml;
+}
+
+function setupObserver() {
+  disconnectObserver();
+  var sentinel = document.getElementById('plazaSentinel');
+  if (!sentinel) return;
+  plazaObserver = new IntersectionObserver(function(entries) {
+    if (entries[0].isIntersecting) loadMorePlaza();
+  }, {rootMargin: '200px'});
+  plazaObserver.observe(sentinel);
+}
+
+function disconnectObserver() {
+  if (plazaObserver) { plazaObserver.disconnect(); plazaObserver = null; }
 }
 
 async function toggleFav(scoreId, e) {
   e.stopPropagation();
   if (!currentUser) { toast('请先登录'); return; }
-  const isFav = myFavIds.has(scoreId);
+  var isFav = myFavIds.has(scoreId);
   if (isFav) {
-    await sb.from('favorites').delete().eq('user_id',currentUser.id).eq('score_id',scoreId);
+    await sb.from('favorites').delete().eq('user_id', currentUser.id).eq('score_id', scoreId);
     myFavIds.delete(scoreId);
     toast('已取消收藏');
   } else {
-    await sb.from('favorites').insert({user_id:currentUser.id, score_id:scoreId});
+    await sb.from('favorites').insert({user_id: currentUser.id, score_id: scoreId});
     myFavIds.add(scoreId);
     toast('已收藏');
   }
-  const s = plazaScores.find(x=>x.id===scoreId);
-  if (s) s.fav_count = parseInt(s.fav_count)+(isFav?-1:1);
+  var s = plazaScores.find(function(x) { return x.id === scoreId; });
+  if (s) s.fav_count = parseInt(s.fav_count, 10) + (isFav ? -1 : 1);
   renderPlaza();
+  if (plazaHasMore) setupObserver(); // re-attach after re-render
 }
 
-// ── Preview modal ──
 function openPreview(scoreId) {
-  const s = plazaScores.find(x=>x.id===scoreId);
+  var s = plazaScores.find(function(x) { return x.id === scoreId; });
   if (!s) return;
   previewScore = s;
-  document.getElementById('previewTitle').textContent = (s.title||'未命名') + ' — ' + (s.author||'');
-  const container = document.getElementById('previewScore');
-  container.innerHTML = renderReadonlyScore(s);
-  const isOwn = currentUser && s.user_id === currentUser.id;
-  const isFav = myFavIds.has(s.id);
-  const forkBtn = document.getElementById('forkBtn');
-  if (isOwn) { forkBtn.style.display='none'; }
-  else { forkBtn.style.display=''; forkBtn.textContent = isFav?'取消收藏':'收藏此乐谱'; forkBtn.className='btn '+(isFav?'':'primary'); }
+  document.getElementById('previewTitle').textContent = (s.title || '未命名') + ' — ' + (s.author || '');
+  // FIX B2: renderReadonlyScore now uses buildRows for proper linebreak support
+  document.getElementById('previewScore').innerHTML = renderReadonlyScore(s);
+  var isOwn  = currentUser && s.user_id === currentUser.id;
+  var isFav  = myFavIds.has(s.id);
+  var forkBtn = document.getElementById('forkBtn');
+  if (isOwn) {
+    forkBtn.style.display = 'none';
+  } else {
+    forkBtn.style.display = '';
+    forkBtn.textContent   = isFav ? '取消收藏' : '收藏此乐谱';
+    forkBtn.className     = 'btn ' + (isFav ? '' : 'primary');
+  }
   document.getElementById('previewOverlay').classList.add('show');
-  sb.from('scores').update({play_count: (s.play_count||0)+1}).eq('id',scoreId);
+  // FIX B3: update play_count on the correct row in scores table (fire-and-forget)
+  sb.from('scores').update({play_count: ((s.play_count || 0) + 1)}).eq('id', scoreId);
 }
 
 function closePreview() {
@@ -1164,120 +1380,162 @@ function closePreview() {
   stopPreviewPlay();
 }
 
-// ── Readonly score render (supports linebreak) ──
+// FIX B2 – uses shared buildRows helper so linebreaks display correctly
 function renderReadonlyScore(s) {
-  const meta = `<div style="text-align:center;margin-bottom:10px">
-    <div style="font-size:20px;font-weight:700">${esc(s.title||'未命名')}</div>
-    <div style="font-size:13px;color:var(--ink2);margin-top:4px">${esc(s.composer||'')}</div>
-  </div>
-  <div class="score-meta-row"><span>1=${s.key}</span><span>${s.time_sig}</span><span>♩=${s.tempo}</span></div>`;
+  var html = '<div style="text-align:center;margin-bottom:10px">'
+    + '<div style="font-size:20px;font-weight:700">' + esc(s.title || '未命名') + '</div>'
+    + '<div style="font-size:13px;color:var(--ink2);margin-top:4px">' + esc(s.composer || '') + '</div>'
+    + '</div>'
+    + '<div class="score-meta-row">'
+    + '<span>1=' + s.key + '</span><span>' + s.time_sig + '</span><span>♩=' + s.tempo + '</span>'
+    + '</div>';
 
-  let html = meta;
-  const measures = s.measures || [];
-  if (!measures.length || measures.every(m=>m.notes.length===0)) {
+  var measures = s.measures || [];
+  if (!measures.length || measures.every(function(m) { return m.notes.length === 0; })) {
     return html + '<div class="score-empty">（空谱）</div>';
   }
 
-  // Use linebreak to split rows, same as editor
-  const rows = [];
-  let currentRow = [];
-  measures.forEach((m, mi) => {
-    currentRow.push(mi);
-    if (m.linebreak) { rows.push(currentRow); currentRow = []; }
-  });
-  if (currentRow.length) rows.push(currentRow);
-
-  rows.forEach(rowMeasures => {
+  buildRows(measures).forEach(function(rowMeasures) {
     html += '<div class="staff-line">';
-    rowMeasures.forEach(mi => {
-      const m = measures[mi];
-      html += `<div class="measure"><span class="mnum">${mi+1}</span><div class="notes-row">`;
-      if (!m.notes.length) { html += '<span class="empty-m">空</span>'; }
-      else m.notes.forEach(n => {
-        const acc = n.acc===1?'#':n.acc===-1?'b':'';
-        const isRest = n.num==='0';
-        let tD='',bD='';
-        if(n.octave>0)for(let i=0;i<n.octave;i++)tD+='<div class="odot"></div>';
-        if(n.octave<0)for(let i=0;i<-n.octave;i++)bD+='<div class="odot"></div>';
-        let ul='';
-        if(n.dur==='e')ul='<div class="nul"></div>';
-        if(n.dur==='s')ul='<div class="nul"></div><div class="nul"></div>';
-        html += `<div class="note-cell" style="cursor:default"><div class="nc-inner">
-          <div class="ndots-t">${tD}</div>
-          <div class="nnum${isRest?' rest':''}">${acc}${isRest?'—':n.num}${n.aug?'<span class="augdot"></span>':''}</div>
-          <div class="nul-wrap">${ul}</div>
-          <div class="ndots-b">${bD}</div>
-        </div></div>`;
-      });
-      html += `</div></div>`;
+    rowMeasures.forEach(function(mi) {
+      var m = measures[mi];
+      html += '<div class="measure"><span class="mnum">' + (mi + 1) + '</span><div class="notes-row">';
+      if (!m.notes.length) {
+        html += '<span class="empty-m">空</span>';
+      } else {
+        m.notes.forEach(function(n) {
+          var acc    = (n.acc === 1) ? '#' : (n.acc === -1) ? 'b' : '';
+          var isRest = (n.num === '0');
+          var tD = '', bD = '';
+          for (var i = 0; i < n.octave;  i++) tD += '<div class="odot"></div>';
+          for (var i = 0; i < -n.octave; i++) bD += '<div class="odot"></div>';
+          var ul = '';
+          if (n.dur === 'e') ul = '<div class="nul"></div>';
+          if (n.dur === 's') ul = '<div class="nul"></div><div class="nul"></div>';
+          html += '<div class="note-cell" style="cursor:default"><div class="nc-inner">'
+            + '<div class="ndots-t">' + tD + '</div>'
+            + '<div class="nnum' + (isRest ? ' rest' : '') + '">' + acc + (isRest ? '—' : n.num) + (n.aug ? '<span class="augdot"></span>' : '') + '</div>'
+            + '<div class="nul-wrap">' + ul + '</div>'
+            + '<div class="ndots-b">' + bD + '</div>'
+            + '</div></div>';
+        });
+      }
+      html += '</div></div>';
     });
     html += '</div>';
   });
   return html;
 }
 
-let previewPlaying=false,previewPlayTimer=null;
-function playPreview(){
-  if(!previewScore)return;
-  if(previewPlaying){stopPreviewPlay();return;}
-  previewPlaying=true;
-  const b=document.getElementById('previewPlayBtn');b.textContent='■ 停止';b.style.background='#c0392b';b.style.borderColor='#c0392b';
-  previewPlayTimer=playMeasures(previewScore.measures,previewScore.key,previewScore.tempo,()=>{previewPlaying=false;resetPreviewPlay();});
+var previewPlaying   = false;
+var previewPlayTimer = null;
+
+function playPreview() {
+  if (!previewScore) return;
+  if (previewPlaying) { stopPreviewPlay(); return; }
+  previewPlaying = true;
+  var b = document.getElementById('previewPlayBtn');
+  b.textContent = '■ 停止'; b.style.background = '#c0392b'; b.style.borderColor = '#c0392b';
+  previewPlayTimer = playMeasures(previewScore.measures, previewScore.key, previewScore.tempo, function() {
+    previewPlaying = false; resetPreviewPlay();
+  });
 }
-function stopPreviewPlay(){previewPlaying=false;if(previewPlayTimer)clearTimeout(previewPlayTimer);if(audioCtx){audioCtx.close();audioCtx=null;}resetPreviewPlay();}
-function resetPreviewPlay(){const b=document.getElementById('previewPlayBtn');if(b){b.textContent='▶ 播放';b.className='btn play';b.style.background='';b.style.borderColor='';}}
+
+function stopPreviewPlay() {
+  previewPlaying = false;
+  if (previewPlayTimer) clearTimeout(previewPlayTimer);
+  if (audioCtx) { audioCtx.close(); audioCtx = null; }
+  resetPreviewPlay();
+}
+
+function resetPreviewPlay() {
+  var b = document.getElementById('previewPlayBtn');
+  if (b) { b.textContent = '▶ 播放'; b.className = 'btn play'; b.style.background = ''; b.style.borderColor = ''; }
+}
 
 async function forkScore() {
-  if(!previewScore||!currentUser)return;
-  await toggleFav(previewScore.id, {stopPropagation:()=>{}});
-  const forkBtn=document.getElementById('forkBtn');
-  const nowFav=myFavIds.has(previewScore.id);
-  forkBtn.textContent=nowFav?'取消收藏':'收藏此乐谱';
-  forkBtn.className='btn '+(nowFav?'':'primary');
+  if (!previewScore || !currentUser) return;
+  await toggleFav(previewScore.id, {stopPropagation: function() {}});
+  var forkBtn = document.getElementById('forkBtn');
+  var nowFav  = myFavIds.has(previewScore.id);
+  forkBtn.textContent = nowFav ? '取消收藏' : '收藏此乐谱';
+  forkBtn.className   = 'btn ' + (nowFav ? '' : 'primary');
 }
 
 // ══════════════════════════════════════════════
 // Example
 // ══════════════════════════════════════════════
-function loadExample(){
-  if(!score)return;
-  const mk=(num,dur,oct)=>({num,dur,octave:oct,aug:false,tie:false,acc:0});
-  score.title='生日快乐';score.composer='传统';
-  score.measures=[
-    {notes:[mk('5','e',0),mk('5','e',0),mk('6','q',0),mk('5','q',0)],linebreak:false},
-    {notes:[mk('1','q',1),mk('7','h',0)],linebreak:true},
-    {notes:[mk('5','e',0),mk('5','e',0),mk('6','q',0),mk('5','q',0)],linebreak:false},
-    {notes:[mk('2','q',1),mk('1','h',1)],linebreak:true},
-    {notes:[mk('5','e',0),mk('5','e',0),mk('5','q',1),mk('3','q',1)],linebreak:false},
-    {notes:[mk('6','e',1),mk('6','e',1),mk('4','q',1),mk('2','q',1)],linebreak:true},
-    {notes:[mk('7','e',0),mk('7','e',0),mk('6','q',1),mk('4','q',1)],linebreak:false},
-    {notes:[mk('5','h',1),mk('0','h',0)],linebreak:false},
+function loadExample() {
+  if (!score) return;
+  function mk(num, dur, oct) { return {num:num, dur:dur, octave:oct, aug:false, tie:false, acc:0}; }
+  snapshotForUndo();
+  score.title    = '生日快乐';
+  score.composer = '传统';
+  score.measures = [
+    {notes:[mk('5','e',0),mk('5','e',0),mk('6','q',0),mk('5','q',0)], linebreak:false},
+    {notes:[mk('1','q',1),mk('7','h',0)],                              linebreak:true},
+    {notes:[mk('5','e',0),mk('5','e',0),mk('6','q',0),mk('5','q',0)], linebreak:false},
+    {notes:[mk('2','q',1),mk('1','h',1)],                              linebreak:true},
+    {notes:[mk('5','e',0),mk('5','e',0),mk('5','q',1),mk('3','q',1)], linebreak:false},
+    {notes:[mk('6','e',1),mk('6','e',1),mk('4','q',1),mk('2','q',1)], linebreak:true},
+    {notes:[mk('7','e',0),mk('7','e',0),mk('6','q',1),mk('4','q',1)], linebreak:false},
+    {notes:[mk('5','h',1),mk('0','h',0)],                              linebreak:false}
   ];
-  document.getElementById('keySelect').value='C';
-  cursor={m:0,n:0};markDirty();renderScore();toast('已加载示例，记得保存');
+  document.getElementById('keySelect').value = 'C';
+  cursor = {m:0, n:0};
+  markDirty();
+  renderScore();
+  toast('已加载示例，记得保存');
 }
 
 // ══════════════════════════════════════════════
 // Build toolbar controls
 // ══════════════════════════════════════════════
-function buildControls(){
-  const kg=document.getElementById('keyGrid');
-  ['1','2','3','4','5','6','7'].forEach(n=>{
-    const b=document.createElement('button');b.className='kbtn';b.textContent=n;b.onclick=()=>ins(n);kg.appendChild(b);
+function buildControls() {
+  var kg = document.getElementById('keyGrid');
+  ['1','2','3','4','5','6','7'].forEach(function(n) {
+    var b = document.createElement('button');
+    b.className   = 'kbtn';
+    b.textContent = n;
+    b.onclick     = function() { ins(n); };
+    kg.appendChild(b);
   });
-  const db=document.getElementById('durBtns');
-  DURS.forEach(d=>{
-    const b=document.createElement('button');b.className='dur-btn'+(d.id===curDur?' on':'');b.id='dur_'+d.id;b.textContent=d.label;
-    b.onclick=()=>{curDur=d.id;DURS.forEach(x=>{const el=document.getElementById('dur_'+x.id);if(el)el.className='dur-btn'+(x.id===curDur?' on':'');});};
+
+  var db = document.getElementById('durBtns');
+  DURS.forEach(function(d) {
+    var b = document.createElement('button');
+    b.className   = 'dur-btn' + (d.id === curDur ? ' on' : '');
+    b.id          = 'dur_' + d.id;
+    b.textContent = d.label;
+    b.onclick = function() {
+      curDur = d.id;
+      DURS.forEach(function(x) {
+        var el = document.getElementById('dur_' + x.id);
+        if (el) el.className = 'dur-btn' + (x.id === curDur ? ' on' : '');
+      });
+    };
     db.appendChild(b);
   });
 }
 
-let toastTimer;
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2400);}
+// ══════════════════════════════════════════════
+// Toast
+// ══════════════════════════════════════════════
+var toastTimer;
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2400);
+}
 
+// ══════════════════════════════════════════════
+// Init
+// ══════════════════════════════════════════════
 buildControls();
-document.getElementById('octDisp').textContent='中';
+document.getElementById('octDisp').textContent = '中';
+refreshUndoRedoUI();
 initAuth();
 </script>
 </body>
