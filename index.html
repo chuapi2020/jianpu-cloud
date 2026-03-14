@@ -1,11 +1,67 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>简谱云</title>
+
+<!-- ══ SEO: Primary meta ══ -->
+<title>简谱云 JianpuCloud — 在线简谱编辑与分享平台 | Online Numbered Notation Editor</title>
+<meta name="description" content="简谱云是一款免费的在线简谱编辑器，支持创作、分享和收藏简谱乐谱。JianpuCloud is a free online numbered musical notation (jianpu) editor for composing, sharing and collecting sheet music.">
+<meta name="keywords" content="简谱,简谱编辑器,在线简谱,乐谱分享,数字谱,jianpu,numbered notation,sheet music editor,music score,online music editor">
+<meta name="author" content="JianpuCloud">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#1a1a1a">
+
+<!-- ══ SEO: Canonical & hreflang ══ -->
+<link rel="canonical" href="https://jianpu-cloud.vercel.app/">
+<link rel="alternate" hreflang="zh-CN" href="https://jianpu-cloud.vercel.app/">
+<link rel="alternate" hreflang="en" href="https://jianpu-cloud.vercel.app/?lang=en">
+<link rel="alternate" hreflang="x-default" href="https://jianpu-cloud.vercel.app/">
+
+<!-- ══ SEO: Open Graph (Facebook / WeChat) ══ -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="简谱云 JianpuCloud">
+<meta property="og:title" content="简谱云 JianpuCloud — 在线简谱编辑与分享平台">
+<meta property="og:description" content="免费在线简谱编辑器，创作、分享和收藏简谱乐谱。Free online jianpu (numbered notation) editor — compose, share and collect sheet music.">
+<meta property="og:url" content="https://jianpu-cloud.vercel.app/">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:locale:alternate" content="en_US">
+
+<!-- ══ SEO: Twitter Card ══ -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="简谱云 JianpuCloud — Online Jianpu Editor">
+<meta name="twitter:description" content="Free online numbered notation (jianpu) editor. Compose, share and collect sheet music.">
+
+<!-- ══ SEO: Structured data — WebApplication ══ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "简谱云 JianpuCloud",
+  "url": "https://jianpu-cloud.vercel.app/",
+  "description": "Free online numbered musical notation (jianpu) editor for composing, sharing and collecting sheet music.",
+  "applicationCategory": "MusicApplication",
+  "operatingSystem": "Any",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "inLanguage": ["zh-CN", "en"],
+  "featureList": [
+    "Online jianpu (numbered notation) editor",
+    "Sheet music sharing community",
+    "Audio playback",
+    "Export to PNG",
+    "Undo / redo",
+    "Mobile responsive"
+  ]
+}
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<noscript><style>body::before{content:"请启用 JavaScript 以使用简谱云。Please enable JavaScript to use JianpuCloud.";display:block;padding:40px;text-align:center;font-family:sans-serif;}</style></noscript>
 <style>
 /* ── Reset & Variables ── */
 *{box-sizing:border-box;margin:0;padding:0}
@@ -206,6 +262,10 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
 /* Mobile drawer toggle */
 .mob-lib-toggle{display:none;background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:0 8px;line-height:48px;flex-shrink:0}
 
+/* ── Language switcher (i18n) ── */
+.lang-btn{background:none;border:1px solid #555;color:#ccc;border-radius:4px;padding:3px 9px;font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:.5px;transition:all .2s;flex-shrink:0}
+.lang-btn:hover{border-color:#fff;color:#fff}
+
 /* ── Library search (U3) ── */
 .lib-search-wrap{padding:6px 8px;border-bottom:1px solid var(--border);flex-shrink:0}
 .lib-search{width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-size:12px;font-family:'Noto Serif SC',serif;color:var(--ink);background:#fff;outline:none;transition:border-color .2s}
@@ -292,17 +352,19 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
     <!-- FIX F1: Mobile drawer toggle -->
     <button class="mob-lib-toggle" id="mobLibToggle" onclick="toggleMobileLib()" aria-label="切换乐谱列表">☰</button>
     <div class="logo">简<span>谱</span>云</div>
-    <div class="nav-tab active" onclick="switchView('editor')" id="navEditor">我的乐谱</div>
-    <div class="nav-tab" onclick="switchView('favorites')" id="navFavorites">我的收藏</div>
-    <div class="nav-tab" onclick="switchView('plaza')" id="navPlaza">乐谱广场</div>
+    <div class="nav-tab active" onclick="switchView('editor')" id="navEditor" data-i18n="nav.myScores">我的乐谱</div>
+    <div class="nav-tab" onclick="switchView('favorites')" id="navFavorites" data-i18n="nav.myFavs">我的收藏</div>
+    <div class="nav-tab" onclick="switchView('plaza')" id="navPlaza" data-i18n="nav.plaza">乐谱广场</div>
     <div class="header-right">
       <span class="save-st" id="saveSt"></span>
-      <button class="btn save-btn" id="headerSaveBtn" onclick="saveScore(false)" style="display:none">保存</button>
+      <button class="btn save-btn" id="headerSaveBtn" onclick="saveScore(false)" style="display:none" data-i18n="action.save">保存</button>
       <div class="user-chip" id="userChip">
         <div class="user-avatar" id="userAvatar">?</div>
         <span id="userNick"></span>
-        <button class="btn ghost" onclick="signOut()" style="padding:3px 8px;font-size:11px;margin-left:4px">退出</button>
+        <button class="btn ghost" onclick="signOut()" style="padding:3px 8px;font-size:11px;margin-left:4px" data-i18n="action.signOut">退出</button>
       </div>
+      <!-- i18n language toggle -->
+      <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
     </div>
   </div>
 
@@ -310,39 +372,38 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
   <div class="view auth-view active" id="viewAuth">
     <div class="auth-card">
       <div class="auth-logo">简<span>谱</span>云</div>
-      <div class="auth-sub">在线简谱编辑与分享平台</div>
+      <div class="auth-sub" data-i18n="auth.sub">在线简谱编辑与分享平台</div>
       <div class="auth-tabs">
-        <div class="auth-tab active" onclick="switchAuthTab('login')" id="tabLogin">登录</div>
-        <div class="auth-tab" onclick="switchAuthTab('register')" id="tabRegister">注册</div>
+        <div class="auth-tab active" onclick="switchAuthTab('login')" id="tabLogin" data-i18n="auth.login">登录</div>
+        <div class="auth-tab" onclick="switchAuthTab('register')" id="tabRegister" data-i18n="auth.register">注册</div>
       </div>
       <div id="authLoginForm">
         <div class="form-group">
-          <label class="form-label">邮箱</label>
+          <label class="form-label" data-i18n="auth.email">邮箱</label>
           <input class="form-input" type="email" id="loginEmail" placeholder="your@email.com">
         </div>
         <div class="form-group">
-          <label class="form-label">密码</label>
-          <!-- FIX B1: use event (not undefined e) in inline handler -->
+          <label class="form-label" data-i18n="auth.password">密码</label>
           <input class="form-input" type="password" id="loginPwd" placeholder="••••••••"
             onkeydown="if(event.key==='Enter') doLogin()">
         </div>
-        <button class="form-btn" onclick="doLogin()" id="loginBtn">登录</button>
+        <button class="form-btn" onclick="doLogin()" id="loginBtn" data-i18n="auth.login">登录</button>
         <div class="auth-msg" id="loginMsg"></div>
       </div>
       <div id="authRegisterForm" style="display:none">
         <div class="form-group">
-          <label class="form-label">邮箱</label>
+          <label class="form-label" data-i18n="auth.email">邮箱</label>
           <input class="form-input" type="email" id="regEmail" placeholder="your@email.com">
         </div>
         <div class="form-group">
-          <label class="form-label">密码（至少 6 位）</label>
+          <label class="form-label" data-i18n="auth.passwordHint">密码（至少 6 位）</label>
           <input class="form-input" type="password" id="regPwd" placeholder="••••••••">
         </div>
         <div class="form-group">
-          <label class="form-label">昵称</label>
-          <input class="form-input" type="text" id="regNick" placeholder="你的显示名">
+          <label class="form-label" data-i18n="auth.nickname">昵称</label>
+          <input class="form-input" type="text" id="regNick" data-i18n-placeholder="auth.nicknamePh">
         </div>
-        <button class="form-btn" onclick="doRegister()" id="regBtn">创建账号</button>
+        <button class="form-btn" onclick="doRegister()" id="regBtn" data-i18n="auth.createAccount">创建账号</button>
         <div class="auth-msg" id="regMsg"></div>
       </div>
     </div>
@@ -352,13 +413,13 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
   <div class="view editor-view" id="viewEditor">
     <div class="library" id="library">
       <div class="lib-hd">
-        <span class="lib-title">我的乐谱</span>
-        <button class="lib-new" onclick="newScore()">+ 新建</button>
+        <span class="lib-title" data-i18n="nav.myScores">我的乐谱</span>
+        <button class="lib-new" onclick="newScore()" data-i18n="action.newScore">+ 新建</button>
       </div>
       <!-- U3: library search -->
       <div class="lib-search-wrap">
         <input class="lib-search" id="libSearch" type="search" placeholder="搜索乐谱…"
-          oninput="filterLib()" autocomplete="off">
+          oninput="filterLib()" autocomplete="off" data-i18n-placeholder="editor.searchLib">
       </div>
       <div class="lib-list" id="libList"></div>
     </div>
@@ -368,7 +429,7 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
           <div id="scoreContent">
             <div class="no-score">
               <div class="no-score-icon">♪</div>
-              <div style="font-size:14px">选择左侧乐谱，或点「+ 新建」</div>
+              <div style="font-size:14px" data-i18n="editor.noScore">选择左侧乐谱，或点「+ 新建」</div>
             </div>
           </div>
         </div>
@@ -377,59 +438,56 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
         <div class="toolbar">
           <!-- Row 1: playback / score settings / share / export -->
           <div class="tb-row">
-            <button class="btn play" id="playBtn" onclick="togglePlay()">▶ 播放</button>
+            <button class="btn play" id="playBtn" onclick="togglePlay()" data-i18n="action.play">▶ 播放</button>
             <div class="divider"></div>
-            <span class="tbl">调号</span>
+            <span class="tbl" data-i18n="editor.key">调号</span>
             <select class="sel-sm" id="keySelect" onchange="setKey(this.value)">
               <option>C</option><option>G</option><option>D</option><option>A</option>
               <option>E</option><option>F</option><option>Bb</option><option>Eb</option>
             </select>
-            <span class="tbl">拍号</span>
+            <span class="tbl" data-i18n="editor.timeSig">拍号</span>
             <select class="sel-sm" id="timeSig" onchange="setTimeSig(this.value)">
               <option value="4/4">4/4</option><option value="3/4">3/4</option>
               <option value="2/4">2/4</option><option value="6/8">6/8</option>
             </select>
-            <span class="tbl">速度</span>
+            <span class="tbl" data-i18n="editor.tempo">速度</span>
             <input type="range" min="40" max="200" value="80" id="tempoSlider" oninput="setTempo(this.value)" style="width:70px">
             <span class="tempo-val" id="tempoVal">80</span>
             <div class="divider"></div>
-            <button class="btn" onclick="addMeasure()">+ 小节</button>
-            <button class="btn" onclick="deleteLast()" style="color:#c0392b">删末节</button>
-            <button class="btn" onclick="loadExample()">示例</button>
+            <button class="btn" onclick="addMeasure()" data-i18n="action.addMeasure">+ 小节</button>
+            <button class="btn" onclick="deleteLast()" style="color:#c0392b" data-i18n="action.delLast">删末节</button>
+            <button class="btn" onclick="loadExample()" data-i18n="action.example">示例</button>
             <div class="divider"></div>
-            <button class="btn" id="shareBtn" onclick="toggleShare()" title="发布到乐谱广场">分享到广场</button>
+            <button class="btn" id="shareBtn" onclick="toggleShare()" data-i18n="action.share">分享到广场</button>
             <div class="divider"></div>
-            <!-- FIX F3: PNG export -->
-            <button class="btn" onclick="exportScoreAsPng()" title="导出为 PNG 图片">导出 PNG</button>
+            <button class="btn" onclick="exportScoreAsPng()" data-i18n="action.exportPng">导出 PNG</button>
           </div>
           <!-- Row 2: note input / undo-redo -->
           <div class="tb-row">
-            <span class="tbl">音符</span>
+            <span class="tbl" data-i18n="editor.notes">音符</span>
             <div id="keyGrid" style="display:flex;gap:3px"></div>
-            <button class="kbtn rest" onclick="ins('0')">休</button>
-            <button class="kbtn bar" onclick="insBar()">|</button>
-            <button class="kbtn newline" onclick="insLineBreak()" title="换行">↵</button>
+            <button class="kbtn rest" onclick="ins('0')" data-i18n="editor.rest">休</button>
+            <button class="kbtn bar" onclick="insBar()" title="Insert bar line">|</button>
+            <button class="kbtn newline" onclick="insLineBreak()" data-i18n-title="editor.lineBreak">↵</button>
             <div class="divider"></div>
-            <button class="btn" onclick="delSel()" style="color:#c0392b">⌫ 删除</button>
+            <button class="btn" onclick="delSel()" style="color:#c0392b" data-i18n="action.delete">⌫ 删除</button>
             <div class="divider"></div>
-            <!-- FIX F2: Undo / Redo -->
-            <button class="btn" id="undoBtn" onclick="undo()" title="撤销 Ctrl+Z" disabled>↩ 撤销</button>
-            <button class="btn" id="redoBtn" onclick="redo()" title="重做 Ctrl+Y / Ctrl+Shift+Z" disabled>↪ 重做</button>
+            <button class="btn" id="undoBtn" onclick="undo()" data-i18n="action.undo" disabled>↩ 撤销</button>
+            <button class="btn" id="redoBtn" onclick="redo()" data-i18n="action.redo" disabled>↪ 重做</button>
             <div class="divider"></div>
-            <!-- U4: Audition (note preview on input) -->
-            <button class="btn" id="auditionBtn" onclick="toggleAudition()" title="输入音符时发声">🔇 试音</button>
+            <button class="btn" id="auditionBtn" onclick="toggleAudition()" data-i18n="editor.auditionOff">🔇 试音</button>
           </div>
           <!-- Row 3: duration / octave / accidentals -->
           <div class="tb-row">
-            <span class="tbl">时值</span>
+            <span class="tbl" data-i18n="editor.duration">时值</span>
             <div id="durBtns" style="display:flex;gap:3px;flex-wrap:wrap"></div>
             <div class="divider"></div>
-            <span class="tbl">八度</span>
-            <button class="btn" onclick="adjOct(-1)">↓低</button>
-            <span id="octDisp" style="font-size:12px;min-width:30px;text-align:center;font-family:'DM Mono',monospace">中</span>
-            <button class="btn" onclick="adjOct(1)">↑高</button>
+            <span class="tbl" data-i18n="editor.octave">八度</span>
+            <button class="btn" onclick="adjOct(-1)" data-i18n="editor.octDown">↓低</button>
+            <span id="octDisp" style="font-size:12px;min-width:30px;text-align:center;font-family:'DM Mono',monospace" data-i18n="editor.octMid">中</span>
+            <button class="btn" onclick="adjOct(1)" data-i18n="editor.octUp">↑高</button>
             <div class="divider"></div>
-            <button class="btn" id="augBtn" onclick="togAug()">附点</button>
+            <button class="btn" id="augBtn" onclick="togAug()" data-i18n="editor.dot">附点</button>
             <button class="btn" id="shBtn" onclick="togAcc(1)">#</button>
             <button class="btn" id="flBtn" onclick="togAcc(-1)">b</button>
             <button class="btn" onclick="togAcc(0)">♮</button>
@@ -437,8 +495,8 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
         </div>
       </div>
       <div class="statusbar">
-        <span id="statusMsg">选择左侧乐谱，或新建</span>
-        <span class="hint">← → 移动 · 1-7 音符 · Del 删除 · Space 播放 · Ctrl+S 保存 · Ctrl+Z 撤销</span>
+        <span id="statusMsg" data-i18n="editor.statusDefault">选择左侧乐谱，或新建</span>
+        <span class="hint" data-i18n="editor.hint">← → 移动 · 1-7 音符 · Del 删除 · Space 播放 · Ctrl+S 保存 · Ctrl+Z 撤销</span>
       </div>
     </div>
   </div>
@@ -446,28 +504,28 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
   <!-- ══ PLAZA VIEW ══ -->
   <div class="view" id="viewPlaza" style="flex-direction:column">
     <div class="plaza-header">
-      <div class="plaza-title">乐谱广场</div>
+      <div class="plaza-title" data-i18n="nav.plaza">乐谱广场</div>
       <div class="plaza-search-row">
-        <input class="plaza-search" id="plazaSearch" placeholder="搜索歌名、作曲…" oninput="debounceSearch()">
-        <button class="btn" onclick="resetAndLoadPlaza()">搜索</button>
+        <input class="plaza-search" id="plazaSearch" placeholder="搜索歌名、作曲…" oninput="debounceSearch()" data-i18n-placeholder="plaza.searchPh">
+        <button class="btn" onclick="resetAndLoadPlaza()" data-i18n="action.search">搜索</button>
       </div>
     </div>
     <div class="plaza-grid" id="plazaGrid">
-      <div class="plaza-empty">加载中…</div>
+      <div class="plaza-empty" data-i18n="plaza.loading">加载中…</div>
     </div>
   </div>
 
   <!-- ══ FAVORITES VIEW (U1) ══ -->
   <div class="view" id="viewFavorites" style="flex-direction:column">
     <div class="favview-header">
-      <div class="favview-title">我的收藏</div>
+      <div class="favview-title" data-i18n="nav.myFavs">我的收藏</div>
       <div class="favview-search-row">
-        <input class="favview-search" id="favSearch" placeholder="搜索收藏的歌名、作曲…" oninput="filterFavView()">
-        <button class="btn" onclick="reloadFavView()">刷新</button>
+        <input class="favview-search" id="favSearch" placeholder="搜索收藏的歌名、作曲…" oninput="filterFavView()" data-i18n-placeholder="favs.searchPh">
+        <button class="btn" onclick="reloadFavView()" data-i18n="action.refresh">刷新</button>
       </div>
     </div>
     <div class="favview-grid" id="favGrid">
-      <div class="favview-empty">加载中…</div>
+      <div class="favview-empty" data-i18n="plaza.loading">加载中…</div>
     </div>
   </div>
 
@@ -480,15 +538,15 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
       <div class="preview-title" id="previewTitle"></div>
       <!-- U2: fullscreen toggle + export PNG -->
       <button class="preview-fullscreen-btn" id="previewFullscreenBtn" onclick="togglePreviewFullscreen()" title="全屏">⛶</button>
-      <button class="preview-fullscreen-btn" onclick="exportPreviewAsPng()" title="导出 PNG">↓ PNG</button>
-      <button class="btn" onclick="closePreview()">关闭</button>
+      <button class="preview-fullscreen-btn" onclick="exportPreviewAsPng()" data-i18n="action.exportPng">↓ PNG</button>
+      <button class="btn" onclick="closePreview()" data-i18n="action.close">关闭</button>
     </div>
     <div class="preview-body">
       <div id="previewScore"></div>
     </div>
     <div class="preview-actions">
-      <button class="btn play" onclick="playPreview()" id="previewPlayBtn">▶ 播放</button>
-      <button class="btn primary" onclick="forkScore()" id="forkBtn">收藏此乐谱</button>
+      <button class="btn play" onclick="playPreview()" id="previewPlayBtn" data-i18n="action.play">▶ 播放</button>
+      <button class="btn primary" onclick="forkScore()" id="forkBtn" data-i18n="action.addFav">收藏此乐谱</button>
     </div>
   </div>
 </div>
@@ -496,11 +554,11 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
 <!-- Confirm Modal -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
-    <div class="modal-title">确认删除</div>
-    <div class="modal-body">确定要删除乐谱 <span class="modal-name" id="modalScoreName"></span> 吗？此操作无法撤销。</div>
+    <div class="modal-title" data-i18n="modal.confirmDeleteTitle">确认删除</div>
+    <div class="modal-body" data-i18n="modal.confirmDeleteBody">确定要删除乐谱 <span class="modal-name" id="modalScoreName"></span> 吗？此操作无法撤销。</div>
     <div class="modal-btns">
-      <button class="modal-cancel" onclick="closeModal()">取消</button>
-      <button class="modal-confirm" onclick="confirmDelete()">删除</button>
+      <button class="modal-cancel" onclick="closeModal()" data-i18n="action.cancel">取消</button>
+      <button class="modal-confirm" onclick="confirmDelete()" data-i18n="action.delete">删除</button>
     </div>
   </div>
 </div>
@@ -508,6 +566,343 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
 <div class="toast" id="toast"></div>
 
 <script>
+// ══════════════════════════════════════════════
+// I18N — Internationalisation
+// Supported languages: 'zh' (Chinese, default) | 'en' (English)
+// ══════════════════════════════════════════════
+var LANG_STRINGS = {
+  zh: {
+    // Navigation
+    'nav.myScores':  '我的乐谱',
+    'nav.myFavs':    '我的收藏',
+    'nav.plaza':     '乐谱广场',
+    // Auth
+    'auth.sub':           '在线简谱编辑与分享平台',
+    'auth.login':         '登录',
+    'auth.register':      '注册',
+    'auth.email':         '邮箱',
+    'auth.password':      '密码',
+    'auth.passwordHint':  '密码（至少 6 位）',
+    'auth.nickname':      '昵称',
+    'auth.nicknamePh':    '你的显示名',
+    'auth.createAccount': '创建账号',
+    'auth.loggingIn':     '登录中…',
+    'auth.registering':   '注册中…',
+    'auth.loginOk':       '登录成功',
+    'auth.loginFail':     '邮箱或密码错误',
+    'auth.fillFields':    '请填写邮箱和密码',
+    'auth.pwdTooShort':   '密码至少 6 位',
+    'auth.registerOk':    '注册成功！请检查邮箱完成验证，然后登录。',
+    // Actions
+    'action.save':       '保存',
+    'action.signOut':    '退出',
+    'action.newScore':   '+ 新建',
+    'action.play':       '▶ 播放',
+    'action.stop':       '■ 停止',
+    'action.addMeasure': '+ 小节',
+    'action.delLast':    '删末节',
+    'action.example':    '示例',
+    'action.share':      '分享到广场',
+    'action.unshare':    '取消分享',
+    'action.exportPng':  '导出 PNG',
+    'action.delete':     '删除',
+    'action.cancel':     '取消',
+    'action.close':      '关闭',
+    'action.search':     '搜索',
+    'action.refresh':    '刷新',
+    'action.undo':       '↩ 撤销',
+    'action.redo':       '↪ 重做',
+    'action.addFav':     '收藏此乐谱',
+    'action.removeFav':  '取消收藏',
+    // Editor
+    'editor.key':          '调号',
+    'editor.timeSig':      '拍号',
+    'editor.tempo':        '速度',
+    'editor.notes':        '音符',
+    'editor.rest':         '休',
+    'editor.lineBreak':    '换行',
+    'editor.duration':     '时值',
+    'editor.octave':       '八度',
+    'editor.octDown':      '↓低',
+    'editor.octMid':       '中',
+    'editor.octUp':        '↑高',
+    'editor.dot':          '附点',
+    'editor.noScore':      '选择左侧乐谱，或点「+ 新建」',
+    'editor.searchLib':    '搜索乐谱…',
+    'editor.statusDefault':'选择左侧乐谱，或新建',
+    'editor.hint':         '← → 移动 · 1-7 音符 · Del 删除 · Space 播放 · Ctrl+S 保存 · Ctrl+Z 撤销',
+    'editor.auditionOff':  '🔇 试音',
+    'editor.auditionOn':   '🔊 试音',
+    'editor.durLabels':    ['全音符','二分','四分','八分','十六'],
+    'editor.octLabels':    ['超低','低','中','高','超高'],
+    // Plaza
+    'plaza.searchPh':  '搜索歌名、作曲…',
+    'plaza.loading':   '加载中…',
+    'plaza.empty':     '暂无乐谱，快去编辑器发布第一首吧！',
+    'plaza.loadFail':  '加载失败: ',
+    // Favs
+    'favs.searchPh':   '搜索收藏的歌名、作曲…',
+    'favs.empty':      '还没有收藏任何乐谱<br>去乐谱广场发现好曲吧！',
+    'favs.noMatch':    '没有匹配的结果',
+    'favs.loadFail':   '收藏加载失败: ',
+    // Lib
+    'lib.empty':       '暂无乐谱<br>点击「+ 新建」创建',
+    'lib.noMatch':     '没有匹配的乐谱',
+    // Modal
+    'modal.confirmDeleteTitle': '确认删除',
+    'modal.confirmDeleteBody':  '确定要删除乐谱',
+    'modal.cannotUndo':         '此操作无法撤销。',
+    // Toast
+    'toast.saved':        '已保存',
+    'toast.saveFail':     '保存失败: ',
+    'toast.created':      '新建乐谱',
+    'toast.createFail':   '创建失败',
+    'toast.deleted':      '已删除',
+    'toast.deleteFail':   '删除失败',
+    'toast.shared':       '已发布到乐谱广场',
+    'toast.unshared':     '已从广场撤回',
+    'toast.favAdded':     '已收藏',
+    'toast.favRemoved':   '已取消收藏',
+    'toast.loginRequired':'请先登录',
+    'toast.loadFail':     '加载失败: ',
+    'toast.exporting':    '正在生成图片…',
+    'toast.exportOk':     '导出成功',
+    'toast.exportFail':   '导出失败: ',
+    'toast.exportLibLoad':'正在加载导出库…',
+    'toast.exportLibFail':'html2canvas 加载失败',
+    'toast.exampleLoaded':'已加载示例，记得保存',
+    'toast.autoSaving':   '',
+    // Status
+    'status.opened':  '已打开：',
+    'status.saved':   '已保存',
+    'status.unsaved': '未保存 ●',
+    // Score render
+    'score.empty':       '使用下方键盘输入第一个音符<br>↵ 按钮可换行',
+    'score.emptyMeasure':'空',
+    'score.emptyPreview':'（空谱）',
+    // By / meta
+    'meta.by': 'by',
+    'meta.me': '(我)',
+    'meta.public': '公开',
+    'meta.untitled': '未命名',
+    'meta.notesUnit': '音',
+    'meta.fullscreen': '全屏',
+    'meta.exitFullscreen': '退出全屏',
+    'meta.newScoreTitle': '新建乐谱',
+    'example.title': '生日快乐',
+    'example.composer': '传统',
+  },
+
+  en: {
+    // Navigation
+    'nav.myScores':  'My Scores',
+    'nav.myFavs':    'My Favourites',
+    'nav.plaza':     'Score Plaza',
+    // Auth
+    'auth.sub':           'Online Jianpu Editor & Sharing Platform',
+    'auth.login':         'Log In',
+    'auth.register':      'Sign Up',
+    'auth.email':         'Email',
+    'auth.password':      'Password',
+    'auth.passwordHint':  'Password (at least 6 characters)',
+    'auth.nickname':      'Display name',
+    'auth.nicknamePh':    'Your display name',
+    'auth.createAccount': 'Create Account',
+    'auth.loggingIn':     'Logging in…',
+    'auth.registering':   'Creating account…',
+    'auth.loginOk':       'Logged in successfully',
+    'auth.loginFail':     'Invalid email or password',
+    'auth.fillFields':    'Please enter your email and password',
+    'auth.pwdTooShort':   'Password must be at least 6 characters',
+    'auth.registerOk':    'Account created! Please check your email to verify, then log in.',
+    // Actions
+    'action.save':       'Save',
+    'action.signOut':    'Sign out',
+    'action.newScore':   '+ New',
+    'action.play':       '▶ Play',
+    'action.stop':       '■ Stop',
+    'action.addMeasure': '+ Bar',
+    'action.delLast':    'Del last',
+    'action.example':    'Example',
+    'action.share':      'Share to Plaza',
+    'action.unshare':    'Unshare',
+    'action.exportPng':  'Export PNG',
+    'action.delete':     'Delete',
+    'action.cancel':     'Cancel',
+    'action.close':      'Close',
+    'action.search':     'Search',
+    'action.refresh':    'Refresh',
+    'action.undo':       '↩ Undo',
+    'action.redo':       '↪ Redo',
+    'action.addFav':     'Add to Favourites',
+    'action.removeFav':  'Remove Favourite',
+    // Editor
+    'editor.key':          'Key',
+    'editor.timeSig':      'Time',
+    'editor.tempo':        'Tempo',
+    'editor.notes':        'Notes',
+    'editor.rest':         'R',
+    'editor.lineBreak':    'Line break',
+    'editor.duration':     'Duration',
+    'editor.octave':       'Octave',
+    'editor.octDown':      '↓ Low',
+    'editor.octMid':       'Mid',
+    'editor.octUp':        '↑ High',
+    'editor.dot':          'Dot',
+    'editor.noScore':      'Select a score on the left, or click "+ New"',
+    'editor.searchLib':    'Search scores…',
+    'editor.statusDefault':'Select a score on the left, or create a new one',
+    'editor.hint':         '← → Move cursor · 1-7 Notes · Del Delete · Space Play · Ctrl+S Save · Ctrl+Z Undo',
+    'editor.auditionOff':  '🔇 Audition',
+    'editor.auditionOn':   '🔊 Audition',
+    'editor.durLabels':    ['Whole','Half','Quarter','8th','16th'],
+    'editor.octLabels':    ['--Low','Low','Mid','High','++High'],
+    // Plaza
+    'plaza.searchPh':  'Search title, composer…',
+    'plaza.loading':   'Loading…',
+    'plaza.empty':     'No scores yet — go publish the first one!',
+    'plaza.loadFail':  'Load failed: ',
+    // Favs
+    'favs.searchPh':   'Search favourites…',
+    'favs.empty':      'No favourites yet<br>Discover scores in the Plaza!',
+    'favs.noMatch':    'No matching results',
+    'favs.loadFail':   'Failed to load favourites: ',
+    // Lib
+    'lib.empty':       'No scores yet<br>Click "+ New" to create one',
+    'lib.noMatch':     'No matching scores',
+    // Modal
+    'modal.confirmDeleteTitle': 'Confirm Delete',
+    'modal.confirmDeleteBody':  'Delete score',
+    'modal.cannotUndo':         'This action cannot be undone.',
+    // Toast
+    'toast.saved':        'Saved',
+    'toast.saveFail':     'Save failed: ',
+    'toast.created':      'New score created',
+    'toast.createFail':   'Failed to create',
+    'toast.deleted':      'Deleted',
+    'toast.deleteFail':   'Failed to delete',
+    'toast.shared':       'Published to Score Plaza',
+    'toast.unshared':     'Removed from Plaza',
+    'toast.favAdded':     'Added to favourites',
+    'toast.favRemoved':   'Removed from favourites',
+    'toast.loginRequired':'Please log in first',
+    'toast.loadFail':     'Load failed: ',
+    'toast.exporting':    'Generating image…',
+    'toast.exportOk':     'Exported successfully',
+    'toast.exportFail':   'Export failed: ',
+    'toast.exportLibLoad':'Loading export library…',
+    'toast.exportLibFail':'html2canvas failed to load',
+    'toast.exampleLoaded':'Example loaded — remember to save',
+    'toast.autoSaving':   '',
+    // Status
+    'status.opened':  'Opened: ',
+    'status.saved':   'Saved',
+    'status.unsaved': 'Unsaved ●',
+    // Score render
+    'score.empty':       'Use the keyboard below to enter your first note<br>↵ to add a line break',
+    'score.emptyMeasure':'empty',
+    'score.emptyPreview':'(empty score)',
+    // By / meta
+    'meta.by': 'by',
+    'meta.me': '(me)',
+    'meta.public': 'Public',
+    'meta.untitled': 'Untitled',
+    'meta.notesUnit': 'notes',
+    'meta.fullscreen': 'Fullscreen',
+    'meta.exitFullscreen': 'Exit fullscreen',
+    'meta.newScoreTitle': 'New Score',
+    'example.title': 'Happy Birthday',
+    'example.composer': 'Traditional',
+  }
+};
+
+// Current language ('zh' or 'en'); read from localStorage or detect browser
+var currentLang = (function() {
+  var saved = localStorage.getItem('jianpu_lang');
+  if (saved === 'zh' || saved === 'en') return saved;
+  // Auto-detect: if browser is not Chinese, default to English
+  var nav = (navigator.language || navigator.userLanguage || 'zh').toLowerCase();
+  return nav.startsWith('zh') ? 'zh' : 'en';
+})();
+
+// t(key) — return translated string for current language
+function t(key) {
+  var strings = LANG_STRINGS[currentLang] || LANG_STRINGS['zh'];
+  return (strings[key] !== undefined) ? strings[key] : (LANG_STRINGS['zh'][key] || key);
+}
+
+// applyLang() — update all elements with data-i18n / data-i18n-placeholder attributes
+function applyLang() {
+  // 1. Text content
+  var nodes = document.querySelectorAll('[data-i18n]');
+  for (var i = 0; i < nodes.length; i++) {
+    var el  = nodes[i];
+    var key = el.getAttribute('data-i18n');
+    // Only replace if the key maps to a plain string (not an array)
+    var val = t(key);
+    if (typeof val === 'string') el.textContent = val;
+  }
+  // 2. Placeholder attributes
+  var phNodes = document.querySelectorAll('[data-i18n-placeholder]');
+  for (var j = 0; j < phNodes.length; j++) {
+    var pEl  = phNodes[j];
+    var pKey = pEl.getAttribute('data-i18n-placeholder');
+    pEl.placeholder = t(pKey);
+  }
+  // 3. Title attributes
+  var titleNodes = document.querySelectorAll('[data-i18n-title]');
+  for (var k = 0; k < titleNodes.length; k++) {
+    var tEl  = titleNodes[k];
+    var tKey = tEl.getAttribute('data-i18n-title');
+    tEl.title = t(tKey);
+  }
+  // 4. Update <html lang> attribute for accessibility & SEO
+  document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+  // 5. Update lang toggle button label
+  var lb = document.getElementById('langBtn');
+  if (lb) lb.textContent = currentLang === 'zh' ? 'EN' : '\u4e2d\u6587';
+  // 6. Re-render dynamic duration buttons if they already exist
+  refreshDurLabels();
+  // 7. Update octave display
+  var od = document.getElementById('octDisp');
+  if (od) {
+    var labels = t('editor.octLabels');
+    if (Array.isArray(labels)) od.textContent = labels[curOct + 2];
+  }
+  // 8. Update confirm modal body (contains a child span, so rebuild carefully)
+  var mb = document.getElementById('modalOverlay');
+  if (mb) {
+    var bodyEl = mb.querySelector('.modal-body');
+    if (bodyEl) {
+      var nameEl = document.getElementById('modalScoreName');
+      var nameText = nameEl ? nameEl.textContent : '';
+      bodyEl.innerHTML = t('modal.confirmDeleteBody') + ' <span class="modal-name" id="modalScoreName">'
+        + nameText + '</span> ' + t('modal.cannotUndo');
+    }
+    var titleEl = mb.querySelector('.modal-title');
+    if (titleEl) titleEl.textContent = t('modal.confirmDeleteTitle');
+  }
+}
+
+function refreshDurLabels() {
+  var labels = t('editor.durLabels');
+  if (!Array.isArray(labels)) return;
+  DURS.forEach(function(d, idx) {
+    var el = document.getElementById('dur_' + d.id);
+    if (el) el.textContent = labels[idx];
+  });
+}
+
+function toggleLang() {
+  currentLang = (currentLang === 'zh') ? 'en' : 'zh';
+  localStorage.setItem('jianpu_lang', currentLang);
+  applyLang();
+  // Re-render any open dynamic content
+  renderLib();
+  if (document.getElementById('viewPlaza').classList.contains('active')) renderPlaza();
+  if (document.getElementById('viewFavorites').classList.contains('active')) renderFavView();
+}
+
 // ══════════════════════════════════════════════
 // CONFIG
 // ══════════════════════════════════════════════
@@ -520,11 +915,11 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Constants
 // ══════════════════════════════════════════════
 const DURS = [
-  {id:'w', label:'全音符', beats:4},
-  {id:'h', label:'二分',   beats:2},
-  {id:'q', label:'四分',   beats:1},
-  {id:'e', label:'八分',   beats:0.5},
-  {id:'s', label:'十六',   beats:0.25}
+  {id:'w', beats:4},
+  {id:'h', beats:2},
+  {id:'q', beats:1},
+  {id:'e', beats:0.5},
+  {id:'s', beats:0.25}
 ];
 
 const SCALE = {
@@ -611,15 +1006,15 @@ async function doLogin() {
   const pwd   = document.getElementById('loginPwd').value;
   const btn   = document.getElementById('loginBtn');
   const msg   = document.getElementById('loginMsg');
-  if (!email || !pwd) { showAuthMsg(msg, '请填写邮箱和密码', 'err'); return; }
-  btn.disabled = true; btn.textContent = '登录中…';
+  if (!email || !pwd) { showAuthMsg(msg, t('auth.fillFields'), 'err'); return; }
+  btn.disabled = true; btn.textContent = t('auth.loggingIn');
   const { data, error } = await sb.auth.signInWithPassword({email, password: pwd});
-  btn.disabled = false; btn.textContent = '登录';
+  btn.disabled = false; btn.textContent = t('auth.login');
   if (error) {
-    showAuthMsg(msg, error.message === 'Invalid login credentials' ? '邮箱或密码错误' : error.message, 'err');
+    showAuthMsg(msg, error.message === 'Invalid login credentials' ? t('auth.loginFail') : error.message, 'err');
     return;
   }
-  showAuthMsg(msg, '登录成功', 'ok');
+  showAuthMsg(msg, t('auth.loginOk'), 'ok');
   await onSignedIn(data.user);
 }
 
@@ -629,16 +1024,16 @@ async function doRegister() {
   const nick  = document.getElementById('regNick').value.trim();
   const btn   = document.getElementById('regBtn');
   const msg   = document.getElementById('regMsg');
-  if (!email || !pwd) { showAuthMsg(msg, '请填写邮箱和密码', 'err'); return; }
-  if (pwd.length < 6) { showAuthMsg(msg, '密码至少 6 位', 'err'); return; }
-  btn.disabled = true; btn.textContent = '注册中…';
+  if (!email || !pwd) { showAuthMsg(msg, t('auth.fillFields'), 'err'); return; }
+  if (pwd.length < 6) { showAuthMsg(msg, t('auth.pwdTooShort'), 'err'); return; }
+  btn.disabled = true; btn.textContent = t('auth.registering');
   const { data, error } = await sb.auth.signUp({email, password: pwd});
-  btn.disabled = false; btn.textContent = '创建账号';
+  btn.disabled = false; btn.textContent = t('auth.createAccount');
   if (error) { showAuthMsg(msg, error.message, 'err'); return; }
   if (nick && data.user) {
     await sb.from('profiles').update({nickname: nick}).eq('id', data.user.id);
   }
-  showAuthMsg(msg, '注册成功！请检查邮箱完成验证，然后登录。', 'ok');
+  showAuthMsg(msg, t('auth.registerOk'), 'ok');
 }
 
 async function signOut() {
@@ -725,7 +1120,7 @@ async function loadMyScores() {
     .select('id,title,composer,key,time_sig,tempo,measures,is_public,updated_at')
     .eq('user_id', currentUser.id)
     .order('updated_at', {ascending: false});
-  if (error) { toast('加载失败: ' + error.message); return; }
+  if (error) { toast(t('toast.loadFail') + error.message); return; }
   myScores = data || [];
   renderLib();
 }
@@ -747,19 +1142,19 @@ function renderLib() {
 
   if (!list.length) {
     el.innerHTML = q
-      ? '<div class="lib-empty">没有匹配的乐谱</div>'
-      : '<div class="lib-empty">暂无乐谱<br>点击「+ 新建」创建</div>';
+      ? '<div class="lib-empty">' + t('lib.noMatch') + '</div>'
+      : '<div class="lib-empty">' + t('lib.empty') + '</div>';
     return;
   }
   el.innerHTML = list.map(function(s) {
     var d  = new Date(s.updated_at);
     var ds = (d.getMonth()+1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2,'0');
     var nc = s.measures.reduce(function(a, m) { return a + m.notes.length; }, 0);
-    var pub = s.is_public ? '<span class="lib-pub-badge">公开</span>' : '';
+    var pub = s.is_public ? '<span class="lib-pub-badge">' + t('meta.public') + '</span>' : '';
     return '<div class="lib-item' + (s.id === activeId ? ' active' : '') + '" onclick="openScore(\'' + s.id + '\')">'
       + '<button class="lib-del" onclick="askDelete(\'' + s.id + '\',event)">×</button>'
-      + '<div class="lib-item-t">' + esc(s.title || '') + (!s.title ? '未命名' : '') + pub + '</div>'
-      + '<div class="lib-item-m">' + s.key + '·' + s.time_sig + '·' + nc + '音·' + ds + '</div>'
+      + '<div class="lib-item-t">' + (esc(s.title) || t('meta.untitled')) + pub + '</div>'
+      + '<div class="lib-item-m">' + s.key + '·' + s.time_sig + '·' + nc + t('meta.notesUnit') + '·' + ds + '</div>'
       + '</div>';
   }).join('');
 }
@@ -773,7 +1168,7 @@ async function newScore() {
   if (!currentUser) return;
   var newS = {
     user_id:   currentUser.id,
-    title:     '新建乐谱',
+    title:     t('meta.newScoreTitle'),
     composer:  '',
     key:       'C',
     time_sig:  '4/4',
@@ -782,11 +1177,11 @@ async function newScore() {
     is_public: false
   };
   var r = await sb.from('scores').insert(newS).select().single();
-  if (r.error) { toast('创建失败'); return; }
+  if (r.error) { toast(t('toast.createFail')); return; }
   myScores.unshift(r.data);
   renderLib();
   openScore(r.data.id);
-  toast('新建乐谱');
+  toast(t('toast.created'));
 }
 
 function openScore(id) {
@@ -806,12 +1201,12 @@ function openScore(id) {
   document.getElementById('tempoSlider').value     = score.tempo;
   document.getElementById('tempoVal').textContent  = score.tempo;
   var shareBtn = document.getElementById('shareBtn');
-  shareBtn.textContent = score.is_public ? '取消分享' : '分享到广场';
+  shareBtn.textContent = score.is_public ? t('action.unshare') : t('action.share');
   shareBtn.className   = 'btn' + (score.is_public ? ' on' : '');
   renderScore();
   renderLib();
-  setStatus('已打开：' + (score.title || '未命名'));
-  setSaveSt('已保存');
+  setStatus(t('status.opened') + (score.title || ''));
+  setSaveSt(t('status.saved'));
   closeMobileLib();
 }
 
@@ -830,13 +1225,13 @@ async function saveScore(silent) {
     updated_at: score.updated_at
   };
   var r = await sb.from('scores').update(payload).eq('id', activeId);
-  if (r.error) { toast('保存失败: ' + r.error.message); return; }
+  if (r.error) { toast(t('toast.saveFail') + r.error.message); return; }
   var idx = myScores.findIndex(function(s) { return s.id === activeId; });
   if (idx >= 0) Object.assign(myScores[idx], payload, {id: activeId});
   dirty = false;
-  setSaveSt('已保存');
+  setSaveSt(t('status.saved'));
   renderLib();
-  if (!silent) toast('已保存');
+  if (!silent) toast(t('toast.saved'));
 }
 
 async function toggleShare() {
@@ -844,16 +1239,16 @@ async function toggleShare() {
   score.is_public = !score.is_public;
   await saveScore(false);
   var shareBtn = document.getElementById('shareBtn');
-  shareBtn.textContent = score.is_public ? '取消分享' : '分享到广场';
+  shareBtn.textContent = score.is_public ? t('action.unshare') : t('action.share');
   shareBtn.className   = 'btn' + (score.is_public ? ' on' : '');
-  toast(score.is_public ? '已发布到乐谱广场' : '已从广场撤回');
+  toast(score.is_public ? t('toast.shared') : t('toast.unshared'));
 }
 
 function askDelete(id, e) {
   e.stopPropagation();
   var s = myScores.find(function(x) { return x.id === id; });
   pendingDeleteId = id;
-  document.getElementById('modalScoreName').textContent = '「' + ((s && s.title) || '未命名') + '」';
+  document.getElementById('modalScoreName').textContent = '「' + ((s && s.title) || '') + '」';
   document.getElementById('modalOverlay').classList.add('show');
 }
 function closeModal() {
@@ -865,7 +1260,7 @@ async function confirmDelete() {
   closeModal();
   if (!id) return;
   var r = await sb.from('scores').delete().eq('id', id);
-  if (r.error) { toast('删除失败'); return; }
+  if (r.error) { toast(t('toast.deleteFail')); return; }
   myScores = myScores.filter(function(x) { return x.id !== id; });
   if (activeId === id) {
     activeId = null; score = null; dirty = false;
@@ -873,10 +1268,11 @@ async function confirmDelete() {
     refreshUndoRedoUI();
     document.getElementById('toolbar').style.display = 'none';
     document.getElementById('scoreContent').innerHTML =
-      '<div class="no-score"><div class="no-score-icon">♪</div><div style="font-size:14px">选择左侧乐谱，或点「+ 新建」</div></div>';
+      '<div class="no-score"><div class="no-score-icon">♪</div>'
+      + '<div style="font-size:14px">' + t('editor.noScore') + '</div></div>';
   }
   renderLib();
-  toast('已删除');
+  toast(t('toast.deleted'));
 }
 
 // ══════════════════════════════════════════════
@@ -944,9 +1340,9 @@ function renderScore() {
   var allEmpty = score.measures.every(function(m) { return m.notes.length === 0; });
 
   var html = '<div style="text-align:center;margin-bottom:10px">'
-    + '<input class="score-title-input" placeholder="乐曲标题" value="' + esc(score.title) + '"'
+    + '<input class="score-title-input" placeholder="' + t('editor.key') + '" value="' + esc(score.title) + '"'
     + ' oninput="score.title=this.value;markDirty();renderLib()">'
-    + '<br><input class="score-comp-input" placeholder="作曲 / 编曲" value="' + esc(score.composer || '') + '"'
+    + '<br><input class="score-comp-input" placeholder="' + t('editor.timeSig') + '" value="' + esc(score.composer || '') + '"'
     + ' oninput="score.composer=this.value;markDirty()">'
     + '</div>'
     + '<div class="score-meta-row">'
@@ -956,7 +1352,7 @@ function renderScore() {
     + '</div>';
 
   if (allEmpty) {
-    html += '<div class="score-empty">使用下方键盘输入第一个音符<br>↵ 按钮可换行</div>';
+    html += '<div class="score-empty">' + t('score.empty') + '</div>';
   } else {
     buildRows(score.measures).forEach(function(rowMeasures) {
       html += '<div class="staff-line">';
@@ -968,7 +1364,7 @@ function renderScore() {
           + '<div class="notes-row">';
         if (!m.notes.length) {
           if (isCur && cursor.n === 0) html += '<span class="cursor-end-beam"></span>';
-          html += '<span class="empty-m">空</span>';
+          html += '<span class="empty-m">' + t('score.emptyMeasure') + '</span>';
         } else {
           m.notes.forEach(function(n, ni) {
             html += renderNote(n, mi, ni, isCur && cursor.n === ni);
@@ -1182,7 +1578,8 @@ function deleteLast() {
 
 function adjOct(d) {
   curOct = Math.max(-2, Math.min(2, curOct + d));
-  document.getElementById('octDisp').textContent = ['超低','低','中','高','超高'][curOct + 2];
+  var labels = t('editor.octLabels');
+  document.getElementById('octDisp').textContent = Array.isArray(labels) ? labels[curOct + 2] : curOct;
 }
 
 function togAug() {
@@ -1205,7 +1602,7 @@ function setTimeSig(v) {
 function setTempo(v) {
   if (score) { score.tempo = parseInt(v, 10); document.getElementById('tempoVal').textContent = v; markDirty(); }
 }
-function markDirty()  { dirty = true; setSaveSt('未保存 ●'); }
+function markDirty()  { dirty = true; setSaveSt(t('status.unsaved')); }
 function setSaveSt(s) { document.getElementById('saveSt').textContent = s; }
 function setStatus(m) { document.getElementById('statusMsg').textContent = m; }
 
@@ -1255,10 +1652,10 @@ function getACtx() {
 }
 
 function playMeasures(measures, key, tempo, onEnd) {
-  var ctx = getACtx();
-  var bd  = 60 / tempo;
-  var dm  = {w:4, h:2, q:1, e:0.5, s:0.25};
-  var t   = ctx.currentTime + 0.1;
+  var ctx      = getACtx();
+  var bd       = 60 / tempo;
+  var dm       = {w:4, h:2, q:1, e:0.5, s:0.25};
+  var schedTime = ctx.currentTime + 0.1;
   measures.forEach(function(m) {
     m.notes.forEach(function(n) {
       var beats = (dm[n.dur] || 1) * (n.aug ? 1.5 : 1);
@@ -1270,14 +1667,14 @@ function playMeasures(measures, key, tempo, onEnd) {
         osc.connect(g); g.connect(ctx.destination);
         osc.type = 'triangle';
         osc.frequency.value = f;
-        g.gain.setValueAtTime(0.4, t);
-        g.gain.exponentialRampToValueAtTime(0.001, t + d * 0.88);
-        osc.start(t); osc.stop(t + d);
+        g.gain.setValueAtTime(0.4, schedTime);
+        g.gain.exponentialRampToValueAtTime(0.001, schedTime + d * 0.88);
+        osc.start(schedTime); osc.stop(schedTime + d);
       }
-      t += d;
+      schedTime += d;
     });
   });
-  return setTimeout(onEnd, (t - ctx.currentTime) * 1000);
+  return setTimeout(onEnd, (schedTime - ctx.currentTime) * 1000);
 }
 
 function togglePlay() {
@@ -1285,7 +1682,7 @@ function togglePlay() {
   if (playing) { stopPlay(); return; }
   playing = true;
   var b = document.getElementById('playBtn');
-  b.textContent = '■ 停止'; b.style.background = '#c0392b'; b.style.borderColor = '#c0392b';
+  b.textContent = t('action.stop'); b.style.background = '#c0392b'; b.style.borderColor = '#c0392b';
   playTimer = playMeasures(score.measures, score.key, score.tempo, function() {
     playing = false; resetPlay();
   });
@@ -1301,7 +1698,7 @@ function stopPlay() {
 function resetPlay() {
   var b = document.getElementById('playBtn');
   if (!b) return;
-  b.textContent = '▶ 播放'; b.className = 'btn play'; b.style.background = ''; b.style.borderColor = '';
+  b.textContent = t('action.play'); b.className = 'btn play'; b.style.background = ''; b.style.borderColor = '';
 }
 
 // ══════════════════════════════════════════════
@@ -1310,17 +1707,17 @@ function resetPlay() {
 async function exportScoreAsPng() {
   if (!score) return;
   if (!window.html2canvas) {
-    toast('正在加载导出库…');
+    toast(t('toast.exportLibLoad'));
     await new Promise(function(resolve, reject) {
       var s   = document.createElement('script');
       s.src   = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
       s.onload  = resolve;
-      s.onerror = function() { reject(new Error('html2canvas 加载失败')); };
+      s.onerror = function() { reject(new Error(t('toast.exportLibFail'))); };
       document.head.appendChild(s);
     }).catch(function(err) { toast(err.message); return null; });
     if (!window.html2canvas) return;
   }
-  toast('正在生成图片…');
+  toast(t('toast.exporting'));
   var el = document.querySelector('.score-paper');
   try {
     var canvas = await window.html2canvas(el, {
@@ -1330,12 +1727,12 @@ async function exportScoreAsPng() {
       logging: false
     });
     var link = document.createElement('a');
-    link.download = (score.title || '乐谱') + '.png';
+    link.download = (score.title || 'score') + '.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
-    toast('导出成功');
+    toast(t('toast.exportOk'));
   } catch (err) {
-    toast('导出失败: ' + err.message);
+    toast(t('toast.exportFail') + err.message);
   }
 }
 
@@ -1378,7 +1775,7 @@ async function loadMorePlaza() {
   var r = await query;
   plazaLoading = false;
 
-  if (r.error) { toast('加载失败: ' + r.error.message); return; }
+  if (r.error) { toast(t('toast.loadFail') + r.error.message); return; }
 
   var batch    = r.data || [];
   plazaScores  = plazaScores.concat(batch);
@@ -1392,7 +1789,7 @@ async function loadMorePlaza() {
 function renderPlaza() {
   var grid = document.getElementById('plazaGrid');
   if (!plazaScores.length) {
-    grid.innerHTML = '<div class="plaza-empty">暂无乐谱，快去编辑器发布第一首吧！</div>';
+    grid.innerHTML = '<div class="plaza-empty">' + t('plaza.empty') + '</div>';
     return;
   }
   var cardsHtml = plazaScores.map(function(s) {
@@ -1401,11 +1798,11 @@ function renderPlaza() {
     var d  = new Date(s.updated_at);
     var ds = (d.getMonth()+1) + '/' + d.getDate();
     return '<div class="plaza-card" onclick="openPreview(\'' + s.id + '\')">'
-      + '<button class="fav-btn' + (isFav ? ' active' : '') + '" onclick="toggleFav(\'' + s.id + '\',event)" title="' + (isFav ? '取消收藏' : '收藏') + '">' + (isFav ? '♥' : '♡') + '</button>'
-      + '<div class="plaza-card-title" title="' + esc(s.title) + '">' + (esc(s.title) || '未命名') + '</div>'
+      + '<button class="fav-btn' + (isFav ? ' active' : '') + '" onclick="toggleFav(\'' + s.id + '\',event)" title="' + (isFav ? t('action.removeFav') : t('action.addFav')) + '">' + (isFav ? '♥' : '♡') + '</button>'
+      + '<div class="plaza-card-title" title="' + esc(s.title) + '">' + (esc(s.title) || '—') + '</div>'
       + '<div class="plaza-card-composer">' + (esc(s.composer) || '—') + '</div>'
       + '<div class="plaza-card-meta">'
-      + '<span class="plaza-card-author">by ' + esc(s.author) + (isOwn ? ' (我)' : '') + '</span>'
+      + '<span class="plaza-card-author">' + t('meta.by') + ' ' + esc(s.author) + (isOwn ? ' ' + t('meta.me') : '') + '</span>'
       + '<span>1=' + s.key + '</span>'
       + '<span>♥ ' + s.fav_count + '</span>'
       + '<span>' + ds + '</span>'
@@ -1432,16 +1829,16 @@ function disconnectObserver() {
 
 async function toggleFav(scoreId, e) {
   e.stopPropagation();
-  if (!currentUser) { toast('请先登录'); return; }
+  if (!currentUser) { toast(t('toast.loginRequired')); return; }
   var isFav = myFavIds.has(scoreId);
   if (isFav) {
     await sb.from('favorites').delete().eq('user_id', currentUser.id).eq('score_id', scoreId);
     myFavIds.delete(scoreId);
-    toast('已取消收藏');
+    toast(t('toast.favRemoved'));
   } else {
     await sb.from('favorites').insert({user_id: currentUser.id, score_id: scoreId});
     myFavIds.add(scoreId);
-    toast('已收藏');
+    toast(t('toast.favAdded'));
   }
   // Sync fav_count in both plaza and fav view caches
   var delta = isFav ? -1 : 1;
@@ -1450,23 +1847,21 @@ async function toggleFav(scoreId, e) {
   var fs = favViewScores.find(function(x) { return x.id === scoreId; });
   if (fs) fs.fav_count = parseInt(fs.fav_count, 10) + delta;
   renderPlaza();
-  if (plazaHasMore) setupObserver(); // re-attach after re-render
+  if (plazaHasMore) setupObserver();
 }
 
 function openPreview(scoreId) {
   var s = plazaScores.find(function(x) { return x.id === scoreId; });
   if (!s) return;
   previewScore = s;
-  document.getElementById('previewTitle').textContent = (s.title || '未命名') + ' — ' + (s.author || '');
-  document.getElementById('previewScore').innerHTML = renderReadonlyScore(s);
-  var isOwn  = currentUser && s.user_id === currentUser.id;
+  document.getElementById('previewTitle').textContent = (s.title || t('meta.untitled')) + ' — ' + (s.author || '');
   var isFav  = myFavIds.has(s.id);
   var forkBtn = document.getElementById('forkBtn');
   if (isOwn) {
     forkBtn.style.display = 'none';
   } else {
     forkBtn.style.display = '';
-    forkBtn.textContent   = isFav ? '取消收藏' : '收藏此乐谱';
+    forkBtn.textContent   = isFav ? t('action.removeFav') : t('action.addFav');
     forkBtn.className     = 'btn ' + (isFav ? '' : 'primary');
   }
   // Reset fullscreen state on each open
@@ -1494,24 +1889,24 @@ function togglePreviewFullscreen() {
   var btn   = document.getElementById('previewFullscreenBtn');
   var isFs  = modal.classList.toggle('fullscreen');
   btn.textContent = isFs ? '⊡' : '⛶';
-  btn.title       = isFs ? '退出全屏' : '全屏';
+  btn.title       = isFs ? t('meta.exitFullscreen') : t('meta.fullscreen');
 }
 
 // U2 – Export the preview score area as PNG
 async function exportPreviewAsPng() {
   if (!previewScore) return;
   if (!window.html2canvas) {
-    toast('正在加载导出库…');
+    toast(t('toast.exportLibLoad'));
     await new Promise(function(resolve, reject) {
       var sc  = document.createElement('script');
       sc.src  = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
       sc.onload  = resolve;
-      sc.onerror = function() { reject(new Error('html2canvas 加载失败')); };
+      sc.onerror = function() { reject(new Error(t('toast.exportLibFail'))); };
       document.head.appendChild(sc);
     }).catch(function(err) { toast(err.message); });
     if (!window.html2canvas) return;
   }
-  toast('正在生成图片…');
+  toast(t('toast.exporting'));
   var el = document.getElementById('previewScore');
   try {
     var canvas = await window.html2canvas(el, {
@@ -1521,12 +1916,12 @@ async function exportPreviewAsPng() {
       logging: false
     });
     var link      = document.createElement('a');
-    link.download = (previewScore.title || '乐谱') + '.png';
+    link.download = (previewScore.title || 'score') + '.png';
     link.href     = canvas.toDataURL('image/png');
     link.click();
-    toast('导出成功');
+    toast(t('toast.exportOk'));
   } catch (err) {
-    toast('导出失败: ' + err.message);
+    toast(t('toast.exportFail') + err.message);
   }
 }
 
@@ -1537,10 +1932,10 @@ function toggleAudition() {
   auditionOn = !auditionOn;
   var btn = document.getElementById('auditionBtn');
   if (auditionOn) {
-    btn.textContent = '🔊 试音';
+    btn.textContent = t('editor.auditionOn');
     btn.classList.add('audition-on');
   } else {
-    btn.textContent = '🔇 试音';
+    btn.textContent = t('editor.auditionOff');
     btn.classList.remove('audition-on');
   }
 }
@@ -1559,11 +1954,11 @@ function auditionNote(n) {
     g.connect(ctx.destination);
     osc.type = 'triangle';
     osc.frequency.value = f;
-    var t = ctx.currentTime;
-    g.gain.setValueAtTime(0.35, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
-    osc.start(t);
-    osc.stop(t + 0.5);
+    var now = ctx.currentTime;
+    g.gain.setValueAtTime(0.35, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+    osc.start(now);
+    osc.stop(now + 0.5);
   } catch (err) {
     // AudioContext may be suspended; ignore silently
   }
@@ -1601,7 +1996,7 @@ async function loadMoreFavView() {
 
   favViewLoading = false;
 
-  if (r.error) { toast('收藏加载失败: ' + r.error.message); return; }
+  if (r.error) { toast(t('favs.loadFail') + r.error.message); return; }
 
   var batch       = r.data || [];
   favViewScores   = favViewScores.concat(batch);
@@ -1641,7 +2036,7 @@ function renderFavView() {
   if (!favViewFiltered.length) {
     var isEmpty = !favViewScores.length;
     grid.innerHTML = '<div class="favview-empty">'
-      + (isEmpty ? '还没有收藏任何乐谱<br>去乐谱广场发现好曲吧！' : '没有匹配的结果')
+      + (isEmpty ? t('favs.empty') : t('favs.noMatch'))
       + '</div>';
     return;
   }
@@ -1649,11 +2044,11 @@ function renderFavView() {
     var d  = new Date(s.updated_at);
     var ds = (d.getMonth()+1) + '/' + d.getDate();
     return '<div class="fav-card" onclick="openFavPreview(\'' + s.id + '\')">'
-      + '<button class="unfav-btn" onclick="unfavFromView(\'' + s.id + '\',event)" title="取消收藏">♥</button>'
-      + '<div class="fav-card-title" title="' + esc(s.title) + '">' + (esc(s.title) || '未命名') + '</div>'
+      + '<button class="unfav-btn" onclick="unfavFromView(\'' + s.id + '\',event)" title="' + t('action.removeFav') + '">♥</button>'
+      + '<div class="fav-card-title" title="' + esc(s.title) + '">' + (esc(s.title) || '—') + '</div>'
       + '<div class="fav-card-composer">' + (esc(s.composer) || '—') + '</div>'
       + '<div class="fav-card-meta">'
-      + '<span class="fav-card-author">by ' + esc(s.author) + '</span>'
+      + '<span class="fav-card-author">' + t('meta.by') + ' ' + esc(s.author) + '</span>'
       + '<span>1=' + s.key + '</span>'
       + '<span>♥ ' + s.fav_count + '</span>'
       + '<span>' + ds + '</span>'
@@ -1683,12 +2078,12 @@ function openFavPreview(scoreId) {
   var s = favViewScores.find(function(x) { return x.id === scoreId; });
   if (!s) return;
   previewScore = s;
-  document.getElementById('previewTitle').textContent = (s.title || '未命名') + ' — ' + (s.author || '');
+  document.getElementById('previewTitle').textContent = (s.title || t('meta.untitled')) + ' — ' + (s.author || '');
   document.getElementById('previewScore').innerHTML = renderReadonlyScore(s);
-  // In favorites view the user already favorited it; show "取消收藏"
+  // In favorites view the user already favorited it; show remove-fav
   var forkBtn = document.getElementById('forkBtn');
   forkBtn.style.display = '';
-  forkBtn.textContent   = '取消收藏';
+  forkBtn.textContent   = t('action.removeFav');
   forkBtn.className     = 'btn';
   // Reset fullscreen state
   document.getElementById('previewModal').classList.remove('fullscreen');
@@ -1707,13 +2102,13 @@ async function unfavFromView(scoreId, e) {
   favViewScores   = favViewScores.filter(function(x)   { return x.id !== scoreId; });
   favViewFiltered = favViewFiltered.filter(function(x) { return x.id !== scoreId; });
   renderFavView();
-  toast('已取消收藏');
+  toast(t('toast.favRemoved'));
 }
 
 // FIX B2 – uses shared buildRows helper so linebreaks display correctly
 function renderReadonlyScore(s) {
   var html = '<div style="text-align:center;margin-bottom:10px">'
-    + '<div style="font-size:20px;font-weight:700">' + esc(s.title || '未命名') + '</div>'
+    + '<div style="font-size:20px;font-weight:700">' + esc(s.title || t('meta.untitled')) + '</div>'
     + '<div style="font-size:13px;color:var(--ink2);margin-top:4px">' + esc(s.composer || '') + '</div>'
     + '</div>'
     + '<div class="score-meta-row">'
@@ -1722,7 +2117,7 @@ function renderReadonlyScore(s) {
 
   var measures = s.measures || [];
   if (!measures.length || measures.every(function(m) { return m.notes.length === 0; })) {
-    return html + '<div class="score-empty">（空谱）</div>';
+    return html + '<div class="score-empty">' + t('score.emptyPreview') + '</div>';
   }
 
   buildRows(measures).forEach(function(rowMeasures) {
@@ -1731,7 +2126,7 @@ function renderReadonlyScore(s) {
       var m = measures[mi];
       html += '<div class="measure"><span class="mnum">' + (mi + 1) + '</span><div class="notes-row">';
       if (!m.notes.length) {
-        html += '<span class="empty-m">空</span>';
+        html += '<span class="empty-m">' + t('score.emptyMeasure') + '</span>';
       } else {
         m.notes.forEach(function(n) {
           var acc    = (n.acc === 1) ? '#' : (n.acc === -1) ? 'b' : '';
@@ -1765,7 +2160,7 @@ function playPreview() {
   if (previewPlaying) { stopPreviewPlay(); return; }
   previewPlaying = true;
   var b = document.getElementById('previewPlayBtn');
-  b.textContent = '■ 停止'; b.style.background = '#c0392b'; b.style.borderColor = '#c0392b';
+  b.textContent = t('action.stop'); b.style.background = '#c0392b'; b.style.borderColor = '#c0392b';
   previewPlayTimer = playMeasures(previewScore.measures, previewScore.key, previewScore.tempo, function() {
     previewPlaying = false; resetPreviewPlay();
   });
@@ -1780,7 +2175,7 @@ function stopPreviewPlay() {
 
 function resetPreviewPlay() {
   var b = document.getElementById('previewPlayBtn');
-  if (b) { b.textContent = '▶ 播放'; b.className = 'btn play'; b.style.background = ''; b.style.borderColor = ''; }
+  if (b) { b.textContent = t('action.play'); b.className = 'btn play'; b.style.background = ''; b.style.borderColor = ''; }
 }
 
 async function forkScore() {
@@ -1788,7 +2183,7 @@ async function forkScore() {
   await toggleFav(previewScore.id, {stopPropagation: function() {}});
   var forkBtn = document.getElementById('forkBtn');
   var nowFav  = myFavIds.has(previewScore.id);
-  forkBtn.textContent = nowFav ? '取消收藏' : '收藏此乐谱';
+  forkBtn.textContent = nowFav ? t('action.removeFav') : t('action.addFav');
   forkBtn.className   = 'btn ' + (nowFav ? '' : 'primary');
   // If favorites view is loaded, keep it in sync
   if (!nowFav) {
@@ -1807,8 +2202,8 @@ function loadExample() {
   if (!score) return;
   function mk(num, dur, oct) { return {num:num, dur:dur, octave:oct, aug:false, tie:false, acc:0}; }
   snapshotForUndo();
-  score.title    = '生日快乐';
-  score.composer = '传统';
+  score.title    = t('example.title');
+  score.composer = t('example.composer');
   score.measures = [
     {notes:[mk('5','e',0),mk('5','e',0),mk('6','q',0),mk('5','q',0)], linebreak:false},
     {notes:[mk('1','q',1),mk('7','h',0)],                              linebreak:true},
@@ -1823,7 +2218,7 @@ function loadExample() {
   cursor = {m:0, n:0};
   markDirty();
   renderScore();
-  toast('已加载示例，记得保存');
+  toast(t('toast.exampleLoaded'));
 }
 
 // ══════════════════════════════════════════════
@@ -1839,12 +2234,13 @@ function buildControls() {
     kg.appendChild(b);
   });
 
-  var db = document.getElementById('durBtns');
-  DURS.forEach(function(d) {
+  var db     = document.getElementById('durBtns');
+  var labels = t('editor.durLabels');
+  DURS.forEach(function(d, idx) {
     var b = document.createElement('button');
     b.className   = 'dur-btn' + (d.id === curDur ? ' on' : '');
     b.id          = 'dur_' + d.id;
-    b.textContent = d.label;
+    b.textContent = Array.isArray(labels) ? labels[idx] : d.id;
     b.onclick = function() {
       curDur = d.id;
       DURS.forEach(function(x) {
@@ -1861,19 +2257,21 @@ function buildControls() {
 // ══════════════════════════════════════════════
 var toastTimer;
 function toast(msg) {
-  var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
+  var toastEl = document.getElementById('toast');
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2400);
+  toastTimer = setTimeout(function() { toastEl.classList.remove('show'); }, 2400);
 }
 
 // ══════════════════════════════════════════════
 // Init
 // ══════════════════════════════════════════════
 buildControls();
-document.getElementById('octDisp').textContent = '中';
+var _initOctLabels = t('editor.octLabels');
+document.getElementById('octDisp').textContent = Array.isArray(_initOctLabels) ? _initOctLabels[curOct + 2] : t('editor.octMid');
 refreshUndoRedoUI();
+applyLang();   // apply i18n to all data-i18n nodes on first load
 initAuth();
 </script>
 </body>
