@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>简谱云</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Variables ── */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#1a1a1a;--ink2:#555;--ink3:#999;
+  --paper:#faf9f6;--paper2:#f3f1ec;--paper3:#e8e5de;
+  --accent:#c0392b;--border:#d6d0c4;
+  --green:#1a7a4a;--blue:#1a4a7a;--cursor-clr:#c0392b;
+}
+body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);height:100vh;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100vh}
+
+/* ── Header ── */
+.header{background:var(--ink);color:#fff;padding:0 20px;display:flex;align-items:center;gap:0;height:48px;flex-shrink:0}
+.logo{font-size:16px;font-weight:700;letter-spacing:2px;margin-right:16px}
+.logo span{color:#e74c3c}
+.nav-tab{padding:0 16px;height:48px;display:flex;align-items:center;font-size:13px;cursor:pointer;color:#aaa;border-bottom:2px solid transparent;transition:all .2s;user-select:none}
+.nav-tab:hover{color:#ddd}
+.nav-tab.active{color:#fff;border-bottom-color:#e74c3c}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.save-st{font-size:12px;color:#aaa;font-family:'DM Mono',monospace}
+.user-chip{display:flex;align-items:center;gap:6px;font-size:12px;color:#ccc}
+.user-avatar{width:26px;height:26px;border-radius:50%;background:#534AB7;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+
+/* ── Buttons ── */
+.btn{border:1px solid var(--border);background:#fff;color:var(--ink);border-radius:5px;padding:5px 11px;font-size:12px;cursor:pointer;transition:all .15s;font-family:'Noto Serif SC',serif;white-space:nowrap}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary:hover{background:#e74c3c}
+.btn.save-btn{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn.save-btn:hover{background:#153d6b}
+.btn.play{background:var(--green);color:#fff;border-color:var(--green)}
+.btn.play:hover{background:#166040}
+.btn.ghost{background:transparent;border-color:#555;color:#ccc}
+.btn.ghost:hover{border-color:#fff;color:#fff}
+
+/* ── Views ── */
+.view{display:none;flex:1;overflow:hidden}
+.view.active{display:flex}
+
+/* ════════════════════════════════
+   AUTH VIEW
+════════════════════════════════ */
+.auth-view{flex-direction:column;align-items:center;justify-content:center;background:var(--paper);gap:0}
+.auth-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:40px 44px;width:100%;max-width:400px;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+.auth-logo{text-align:center;font-size:28px;font-weight:700;letter-spacing:3px;margin-bottom:6px}
+.auth-logo span{color:#e74c3c}
+.auth-sub{text-align:center;font-size:13px;color:var(--ink3);margin-bottom:32px}
+.auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:24px}
+.auth-tab{flex:1;text-align:center;padding:10px;font-size:14px;cursor:pointer;color:var(--ink3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s}
+.auth-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500}
+.form-group{margin-bottom:16px}
+.form-label{font-size:12px;color:var(--ink2);margin-bottom:6px;display:block;font-weight:500}
+.form-input{width:100%;border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:14px;font-family:'Noto Serif SC',serif;color:var(--ink);background:#fff;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--accent)}
+.form-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:6px;padding:12px;font-size:14px;font-weight:500;cursor:pointer;font-family:'Noto Serif SC',serif;transition:background .2s;margin-top:8px}
+.form-btn:hover{background:#e74c3c}
+.form-btn:disabled{background:#ccc;cursor:not-allowed}
+.auth-msg{font-size:12px;text-align:center;margin-top:12px;min-height:18px}
+.auth-msg.ok{color:var(--green)}
+.auth-msg.err{color:var(--accent)}
+
+/* ════════════════════════════════
+   EDITOR VIEW
+════════════════════════════════ */
+.editor-view{flex-direction:row}
+.library{width:210px;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--paper2);flex-shrink:0}
+.lib-hd{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.lib-title{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--ink2);text-transform:uppercase}
+.lib-new{background:var(--accent);color:#fff;border:none;border-radius:4px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:'Noto Serif SC',serif}
+.lib-new:hover{background:#e74c3c}
+.lib-list{flex:1;overflow-y:auto;padding:6px}
+.lib-item{padding:9px 10px;border-radius:6px;cursor:pointer;margin-bottom:3px;border:1px solid transparent;position:relative;transition:background .12s}
+.lib-item:hover{background:var(--paper3)}
+.lib-item.active{background:var(--paper);border-color:var(--border)}
+.lib-item-t{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:20px}
+.lib-item-m{font-size:11px;color:var(--ink3);margin-top:2px;font-family:'DM Mono',monospace}
+.lib-del{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--ink3);cursor:pointer;font-size:15px;display:none;padding:2px 5px;border-radius:3px}
+.lib-item:hover .lib-del{display:block}
+.lib-del:hover{color:var(--accent)}
+.lib-empty{padding:20px;text-align:center;color:var(--ink3);font-size:12px;line-height:1.8}
+.editor-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* Score area */
+.score-view{flex:1;overflow-y:auto;padding:16px 24px;background:var(--paper)}
+.score-paper{background:#fff;border:1px solid var(--border);border-radius:8px;padding:32px 40px;min-height:300px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.score-title-input{width:100%;text-align:center;font-size:22px;font-weight:700;font-family:'Noto Serif SC',serif;border:none;outline:none;background:transparent;color:var(--ink);padding:4px;border-bottom:2px solid transparent;transition:border-color .2s}
+.score-title-input:focus{border-bottom-color:var(--accent)}
+.score-comp-input{width:100%;text-align:center;font-size:13px;font-family:'Noto Serif SC',serif;border:none;outline:none;background:transparent;color:var(--ink2);padding:2px;margin-top:2px}
+.score-meta-row{display:flex;justify-content:space-between;margin:12px 0 14px;padding-bottom:10px;border-bottom:2px solid var(--ink);font-size:12px;color:var(--ink2);font-family:'DM Mono',monospace}
+.score-empty{padding:40px;text-align:center;color:var(--ink3);font-size:14px;line-height:2.2}
+.no-score{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px;color:var(--ink3);gap:14px}
+.no-score-icon{font-size:48px;opacity:.2}
+.staff-line{display:flex;align-items:stretch;padding:6px 0;border-bottom:1px solid var(--border);flex-wrap:nowrap;overflow:hidden;min-height:90px}
+.staff-line:last-child{border-bottom:none}
+.measure{display:flex;flex-direction:column;padding:0 10px 0 2px;border-right:2px solid var(--ink2);position:relative;min-width:0;flex-shrink:0}
+.measure:last-child{border-right:none;padding-right:2px}
+.measure.cur-m{background:rgba(192,57,43,.04);border-radius:4px}
+.mnum{position:absolute;top:2px;left:2px;font-size:9px;color:var(--ink3);font-family:'DM Mono',monospace}
+.notes-row{display:flex;align-items:flex-end;min-height:68px;padding-top:10px}
+.note-cell{display:flex;flex-direction:column;align-items:center;min-width:30px;padding:0 3px;cursor:pointer;border-radius:3px;position:relative;user-select:none}
+.nc-inner{display:flex;flex-direction:column;align-items:center;padding:2px 3px;width:100%;border-radius:3px;transition:background .1s}
+.note-cell:hover .nc-inner{background:rgba(192,57,43,.08)}
+.note-cell.sel .nc-inner{background:rgba(192,57,43,.18)}
+.note-cell.cursor-before::before{content:'';position:absolute;left:-2px;top:8px;bottom:4px;width:2px;background:var(--cursor-clr);border-radius:1px;animation:blink .9s steps(1) infinite;z-index:10}
+.cursor-end-beam{width:3px;min-width:3px;align-self:stretch;position:relative;margin-left:2px;margin-right:4px}
+.cursor-end-beam::before{content:'';position:absolute;left:0;top:8px;bottom:4px;width:2px;background:var(--cursor-clr);border-radius:1px;animation:blink .9s steps(1) infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.ndots-t{height:12px;display:flex;align-items:center;justify-content:center;gap:2px}
+.ndots-b{height:12px;display:flex;align-items:center;justify-content:center;gap:2px}
+.odot{width:4px;height:4px;border-radius:50%;background:var(--ink)}
+.nnum{font-size:20px;font-weight:500;line-height:1.1;color:var(--ink);position:relative;font-family:'Noto Serif SC',serif}
+.nnum.rest{color:var(--ink3)}
+.nul-wrap{height:14px;display:flex;flex-direction:column;justify-content:flex-start;gap:2px;margin-top:1px;width:100%}
+.nul{height:2px;background:var(--ink);width:100%;border-radius:1px}
+.augdot{position:absolute;right:-7px;top:1px;width:4px;height:4px;border-radius:50%;background:var(--ink)}
+.tiemark{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:20px;color:var(--ink2);line-height:1}
+.empty-m{font-size:12px;color:var(--ink3);padding:0 8px;align-self:center}
+.linebreak-mark{flex:1;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;color:var(--ink3);font-size:11px;font-family:'DM Mono',monospace;gap:4px}
+
+/* Toolbar */
+.toolbar{background:var(--paper2);border-top:1px solid var(--border);padding:8px 14px;display:flex;flex-direction:column;gap:7px;flex-shrink:0}
+.tb-row{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.tbl{font-size:11px;color:var(--ink3);white-space:nowrap;min-width:24px}
+.sel-sm{border:1px solid var(--border);background:#fff;color:var(--ink);border-radius:5px;padding:5px 8px;font-size:12px;font-family:'Noto Serif SC',serif;cursor:pointer}
+.kbtn{border:1px solid var(--border);background:#fff;color:var(--ink);border-radius:5px;padding:7px 3px;font-size:17px;font-weight:700;cursor:pointer;min-width:34px;text-align:center;transition:all .15s;font-family:'Noto Serif SC',serif}
+.kbtn:hover{border-color:var(--accent);color:var(--accent)}
+.kbtn.rest{font-size:12px;color:var(--ink2)}
+.kbtn.bar{color:var(--green)}
+.kbtn.newline{color:#7a4aaa;font-size:12px}
+.dur-btn{border:1px solid var(--border);background:#fff;color:var(--ink);border-radius:5px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s}
+.dur-btn:hover{border-color:var(--accent);color:var(--accent)}
+.dur-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.divider{width:1px;height:22px;background:var(--border);flex-shrink:0}
+.tempo-val{font-family:'DM Mono',monospace;font-size:12px;min-width:32px}
+.statusbar{background:var(--ink);color:#aaa;padding:4px 16px;font-size:11px;display:flex;gap:16px;align-items:center;font-family:'DM Mono',monospace;flex-shrink:0}
+
+/* Share badge on lib item */
+.lib-pub-badge{display:inline-block;font-size:9px;background:#1a7a4a;color:#fff;border-radius:3px;padding:1px 4px;margin-left:4px;vertical-align:middle}
+
+/* ════════════════════════════════
+   PLAZA VIEW
+════════════════════════════════ */
+.plaza-view{flex-direction:column;background:var(--paper)}
+.plaza-header{padding:16px 24px 0;flex-shrink:0}
+.plaza-title{font-size:20px;font-weight:700;margin-bottom:12px}
+.plaza-search-row{display:flex;gap:8px;margin-bottom:16px}
+.plaza-search{flex:1;border:1px solid var(--border);border-radius:6px;padding:9px 14px;font-size:14px;font-family:'Noto Serif SC',serif;outline:none;background:#fff;color:var(--ink)}
+.plaza-search:focus{border-color:var(--accent)}
+.plaza-grid{flex:1;overflow-y:auto;padding:0 24px 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;align-content:start}
+.plaza-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px 18px;cursor:pointer;transition:box-shadow .2s,border-color .2s;position:relative}
+.plaza-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1);border-color:#bbb}
+.plaza-card-title{font-size:15px;font-weight:700;margin-bottom:4px;padding-right:28px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plaza-card-composer{font-size:12px;color:var(--ink3);margin-bottom:10px}
+.plaza-card-meta{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--ink3);font-family:'DM Mono',monospace}
+.plaza-card-author{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fav-btn{position:absolute;top:14px;right:14px;background:none;border:none;font-size:18px;cursor:pointer;line-height:1;transition:transform .15s}
+.fav-btn:hover{transform:scale(1.2)}
+.fav-btn.active{color:#e74c3c}
+.plaza-empty{grid-column:1/-1;text-align:center;padding:60px;color:var(--ink3);font-size:14px;line-height:2}
+
+/* Score preview modal */
+.preview-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.preview-overlay.show{opacity:1;pointer-events:all}
+.preview-modal{background:#fff;border-radius:12px;width:90%;max-width:680px;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 12px 48px rgba(0,0,0,.2)}
+.preview-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.preview-title{font-size:16px;font-weight:700;flex:1}
+.preview-body{flex:1;overflow-y:auto;padding:20px 28px}
+.preview-actions{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+
+/* ── Confirm Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal{background:#fff;border-radius:10px;padding:24px 28px;min-width:260px;max-width:340px;box-shadow:0 8px 32px rgba(0,0,0,.18);transform:translateY(8px);transition:transform .2s}
+.modal-overlay.show .modal{transform:translateY(0)}
+.modal-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.modal-body{font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:20px}
+.modal-name{font-weight:500;color:var(--ink)}
+.modal-btns{display:flex;justify-content:flex-end;gap:8px}
+.modal-cancel{border:1px solid var(--border);background:#fff;color:var(--ink2);border-radius:5px;padding:6px 16px;font-size:13px;cursor:pointer;font-family:'Noto Serif SC',serif}
+.modal-cancel:hover{border-color:var(--ink2)}
+.modal-confirm{border:none;background:var(--accent);color:#fff;border-radius:5px;padding:6px 16px;font-size:13px;cursor:pointer;font-family:'Noto Serif SC',serif}
+.modal-confirm:hover{background:#e74c3c}
+
+/* Toast */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#fff;padding:10px 22px;border-radius:8px;font-size:13px;opacity:0;transition:all .3s;pointer-events:none;z-index:999;font-family:'Noto Serif SC',serif}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Loading spinner */
+.spinner{width:18px;height:18px;border:2px solid #ddd;border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ══ HEADER ══ -->
+  <div class="header" id="mainHeader" style="display:none">
+    <div class="logo">简<span>谱</span>云</div>
+    <div class="nav-tab active" onclick="switchView('editor')" id="navEditor">我的乐谱</div>
+    <div class="nav-tab" onclick="switchView('plaza')" id="navPlaza">乐谱广场</div>
+    <div class="header-right">
+      <span class="save-st" id="saveSt"></span>
+      <button class="btn save-btn" id="headerSaveBtn" onclick="saveScore()" style="display:none">保存</button>
+      <div class="user-chip" id="userChip">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <span id="userNick"></span>
+        <button class="btn ghost" onclick="signOut()" style="padding:3px 8px;font-size:11px;margin-left:4px">退出</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ AUTH VIEW ══ -->
+  <div class="view auth-view active" id="viewAuth">
+    <div class="auth-card">
+      <div class="auth-logo">简<span>谱</span>云</div>
+      <div class="auth-sub">在线简谱编辑与分享平台</div>
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchAuthTab('login')" id="tabLogin">登录</div>
+        <div class="auth-tab" onclick="switchAuthTab('register')" id="tabRegister">注册</div>
+      </div>
+      <div id="authLoginForm">
+        <div class="form-group">
+          <label class="form-label">邮箱</label>
+          <input class="form-input" type="email" id="loginEmail" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">密码</label>
+          <input class="form-input" type="password" id="loginPwd" placeholder="••••••••" onkeydown="if(e.key==='Enter')doLogin()">
+        </div>
+        <button class="form-btn" onclick="doLogin()" id="loginBtn">登录</button>
+        <div class="auth-msg" id="loginMsg"></div>
+      </div>
+      <div id="authRegisterForm" style="display:none">
+        <div class="form-group">
+          <label class="form-label">邮箱</label>
+          <input class="form-input" type="email" id="regEmail" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">密码（至少 6 位）</label>
+          <input class="form-input" type="password" id="regPwd" placeholder="••••••••">
+        </div>
+        <div class="form-group">
+          <label class="form-label">昵称</label>
+          <input class="form-input" type="text" id="regNick" placeholder="你的显示名">
+        </div>
+        <button class="form-btn" onclick="doRegister()" id="regBtn">创建账号</button>
+        <div class="auth-msg" id="regMsg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ EDITOR VIEW ══ -->
+  <div class="view editor-view" id="viewEditor">
+    <div class="library">
+      <div class="lib-hd">
+        <span class="lib-title">我的乐谱</span>
+        <button class="lib-new" onclick="newScore()">+ 新建</button>
+      </div>
+      <div class="lib-list" id="libList"></div>
+    </div>
+    <div class="editor-main">
+      <div class="score-view">
+        <div class="score-paper">
+          <div id="scoreContent">
+            <div class="no-score">
+              <div class="no-score-icon">♪</div>
+              <div style="font-size:14px">选择左侧乐谱，或点「+ 新建」</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="toolbar" style="display:none">
+        <div class="toolbar">
+          <div class="tb-row">
+            <button class="btn play" id="playBtn" onclick="togglePlay()">▶ 播放</button>
+            <div class="divider"></div>
+            <span class="tbl">调号</span>
+            <select class="sel-sm" id="keySelect" onchange="setKey(this.value)">
+              <option>C</option><option>G</option><option>D</option><option>A</option>
+              <option>E</option><option>F</option><option>Bb</option><option>Eb</option>
+            </select>
+            <span class="tbl">拍号</span>
+            <select class="sel-sm" id="timeSig" onchange="setTimeSig(this.value)">
+              <option value="4/4">4/4</option><option value="3/4">3/4</option>
+              <option value="2/4">2/4</option><option value="6/8">6/8</option>
+            </select>
+            <span class="tbl">速度</span>
+            <input type="range" min="40" max="200" value="80" id="tempoSlider" oninput="setTempo(this.value)" style="width:70px">
+            <span class="tempo-val" id="tempoVal">80</span>
+            <div class="divider"></div>
+            <button class="btn" onclick="addMeasure()">+ 小节</button>
+            <button class="btn" onclick="deleteLast()" style="color:#c0392b">删末节</button>
+            <button class="btn" onclick="loadExample()">示例</button>
+            <div class="divider"></div>
+            <button class="btn" id="shareBtn" onclick="toggleShare()" title="发布到乐谱广场">分享到广场</button>
+          </div>
+          <div class="tb-row">
+            <span class="tbl">音符</span>
+            <div id="keyGrid" style="display:flex;gap:3px"></div>
+            <button class="kbtn rest" onclick="ins('0')">休</button>
+            <button class="kbtn bar" onclick="insBar()">|</button>
+            <button class="kbtn newline" onclick="insLineBreak()" title="换行">↵</button>
+            <div class="divider"></div>
+            <button class="btn" onclick="delSel()" style="color:#c0392b">⌫ 删除</button>
+          </div>
+          <div class="tb-row">
+            <span class="tbl">时值</span>
+            <div id="durBtns" style="display:flex;gap:3px;flex-wrap:wrap"></div>
+            <div class="divider"></div>
+            <span class="tbl">八度</span>
+            <button class="btn" onclick="adjOct(-1)">↓低</button>
+            <span id="octDisp" style="font-size:12px;min-width:30px;text-align:center;font-family:'DM Mono',monospace">中</span>
+            <button class="btn" onclick="adjOct(1)">↑高</button>
+            <div class="divider"></div>
+            <button class="btn" id="augBtn" onclick="togAug()">附点</button>
+            <button class="btn" id="shBtn" onclick="togAcc(1)">#</button>
+            <button class="btn" id="flBtn" onclick="togAcc(-1)">b</button>
+            <button class="btn" onclick="togAcc(0)">♮</button>
+          </div>
+        </div>
+      </div>
+      <div class="statusbar">
+        <span id="statusMsg">选择左侧乐谱，或新建</span>
+        <span style="margin-left:auto">← → 移动光标 · 1-7 音符 · Del 删除 · Space 播放 · Ctrl+S 保存</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PLAZA VIEW ══ -->
+  <div class="view" id="viewPlaza" style="flex-direction:column">
+    <div class="plaza-header">
+      <div class="plaza-title">乐谱广场</div>
+      <div class="plaza-search-row">
+        <input class="plaza-search" id="plazaSearch" placeholder="搜索歌名、作曲…" oninput="debounceSearch()">
+        <button class="btn" onclick="loadPlaza()">搜索</button>
+      </div>
+    </div>
+    <div class="plaza-grid" id="plazaGrid">
+      <div class="plaza-empty">加载中…</div>
+    </div>
+  </div>
+
+</div><!-- .app -->
+
+<!-- Score Preview Modal -->
+<div class="preview-overlay" id="previewOverlay" onclick="if(event.target===this)closePreview()">
+  <div class="preview-modal">
+    <div class="preview-header">
+      <div class="preview-title" id="previewTitle"></div>
+      <button class="btn" onclick="closePreview()">关闭</button>
+    </div>
+    <div class="preview-body">
+      <div id="previewScore"></div>
+    </div>
+    <div class="preview-actions">
+      <button class="btn play" onclick="playPreview()" id="previewPlayBtn">▶ 播放</button>
+      <button class="btn primary" onclick="forkScore()" id="forkBtn">收藏此乐谱</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title">确认删除</div>
+    <div class="modal-body">确定要删除乐谱 <span class="modal-name" id="modalScoreName"></span> 吗？此操作无法撤销。</div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">取消</button>
+      <button class="modal-confirm" onclick="confirmDelete()">删除</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// CONFIG — replace with your Supabase project values
+// ══════════════════════════════════════════════
+const SUPABASE_URL = 'https://ywahjuecnjjzhrkuidbj.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_Ob6coi6A0K0845oZWJGD9g_2uq8FuB3';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ══════════════════════════════════════════════
+// State
+// ══════════════════════════════════════════════
+const DURS=[{id:'w',label:'全音符',beats:4},{id:'h',label:'二分',beats:2},{id:'q',label:'四分',beats:1},{id:'e',label:'八分',beats:.5},{id:'s',label:'十六',beats:.25}];
+const SCALE={C:[0,2,4,5,7,9,11],G:[7,9,11,12,14,16,17],D:[2,4,6,7,9,11,13],A:[9,11,13,14,16,18,20],E:[4,6,8,9,11,13,15],F:[-5,-3,-1,0,2,4,6],Bb:[-2,0,2,3,5,7,9],Eb:[3,5,7,8,10,12,14]};
+
+let currentUser = null;
+let userProfile = null;
+let myScores = [];
+let activeId = null;
+let score = null;
+let cursor = {m:0, n:0};
+let curDur='q', curOct=0, curAug=false, curAcc=0;
+let playing=false, playTimer=null, audioCtx=null;
+let dirty=false;
+let pendingDeleteId=null;
+let previewScore=null;
+let myFavIds=new Set();
+let plazaScores=[];
+let searchTimer=null;
+
+// ══════════════════════════════════════════════
+// Auth
+// ══════════════════════════════════════════════
+async function initAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) await onSignedIn(session.user);
+}
+
+async function onSignedIn(user) {
+  currentUser = user;
+  const { data } = await sb.from('profiles').select('nickname').eq('id', user.id).single();
+  userProfile = data;
+  const nick = data?.nickname || user.email.split('@')[0];
+  document.getElementById('userNick').textContent = nick;
+  document.getElementById('userAvatar').textContent = nick.charAt(0).toUpperCase();
+  document.getElementById('mainHeader').style.display = 'flex';
+  document.getElementById('viewAuth').classList.remove('active');
+  switchView('editor');
+  await loadMyScores();
+  await loadMyFavs();
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pwd = document.getElementById('loginPwd').value;
+  const btn = document.getElementById('loginBtn');
+  const msg = document.getElementById('loginMsg');
+  if (!email||!pwd) { showAuthMsg(msg,'请填写邮箱和密码','err'); return; }
+  btn.disabled=true; btn.textContent='登录中…';
+  const { data, error } = await sb.auth.signInWithPassword({email, password:pwd});
+  btn.disabled=false; btn.textContent='登录';
+  if (error) { showAuthMsg(msg, error.message==='Invalid login credentials'?'邮箱或密码错误':error.message, 'err'); return; }
+  showAuthMsg(msg,'登录成功','ok');
+  await onSignedIn(data.user);
+}
+
+async function doRegister() {
+  const email = document.getElementById('regEmail').value.trim();
+  const pwd = document.getElementById('regPwd').value;
+  const nick = document.getElementById('regNick').value.trim();
+  const btn = document.getElementById('regBtn');
+  const msg = document.getElementById('regMsg');
+  if (!email||!pwd) { showAuthMsg(msg,'请填写邮箱和密码','err'); return; }
+  if (pwd.length<6) { showAuthMsg(msg,'密码至少 6 位','err'); return; }
+  btn.disabled=true; btn.textContent='注册中…';
+  const { data, error } = await sb.auth.signUp({email, password:pwd});
+  btn.disabled=false; btn.textContent='创建账号';
+  if (error) { showAuthMsg(msg, error.message, 'err'); return; }
+  // update nickname
+  if (nick && data.user) {
+    await sb.from('profiles').update({nickname:nick}).eq('id', data.user.id);
+  }
+  showAuthMsg(msg,'注册成功！请检查邮箱完成验证，然后登录。','ok');
+}
+
+async function signOut() {
+  await sb.auth.signOut();
+  currentUser=null; score=null; activeId=null; myScores=[];
+  document.getElementById('mainHeader').style.display='none';
+  document.getElementById('viewEditor').classList.remove('active');
+  document.getElementById('viewPlaza').classList.remove('active');
+  document.getElementById('viewAuth').classList.add('active');
+  document.getElementById('toolbar').style.display='none';
+}
+
+function switchAuthTab(tab) {
+  document.getElementById('authLoginForm').style.display = tab==='login'?'':'none';
+  document.getElementById('authRegisterForm').style.display = tab==='register'?'':'none';
+  document.getElementById('tabLogin').classList.toggle('active', tab==='login');
+  document.getElementById('tabRegister').classList.toggle('active', tab==='register');
+}
+
+function showAuthMsg(el, msg, type) {
+  el.textContent=msg; el.className='auth-msg '+type;
+}
+
+// ══════════════════════════════════════════════
+// Views
+// ══════════════════════════════════════════════
+function switchView(v) {
+  document.getElementById('viewEditor').classList.toggle('active', v==='editor');
+  document.getElementById('viewPlaza').classList.toggle('active', v==='plaza');
+  document.getElementById('navEditor').classList.toggle('active', v==='editor');
+  document.getElementById('navPlaza').classList.toggle('active', v==='plaza');
+  document.getElementById('headerSaveBtn').style.display = v==='editor'?'':'none';
+  if (v==='plaza') loadPlaza();
+}
+
+// ══════════════════════════════════════════════
+// My Scores (Supabase)
+// ══════════════════════════════════════════════
+async function loadMyScores() {
+  const { data, error } = await sb.from('scores')
+    .select('id,title,composer,key,time_sig,tempo,measures,is_public,updated_at')
+    .eq('user_id', currentUser.id)
+    .order('updated_at', {ascending:false});
+  if (error) { toast('加载失败: '+error.message); return; }
+  myScores = data || [];
+  renderLib();
+}
+
+async function loadMyFavs() {
+  const { data } = await sb.from('favorites').select('score_id').eq('user_id', currentUser.id);
+  myFavIds = new Set((data||[]).map(r=>r.score_id));
+}
+
+function renderLib() {
+  const el = document.getElementById('libList');
+  if (!myScores.length) { el.innerHTML='<div class="lib-empty">暂无乐谱<br>点击「+ 新建」创建</div>'; return; }
+  el.innerHTML = myScores.map(s => {
+    const d=new Date(s.updated_at);
+    const ds=`${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+    const nc = s.measures.reduce((a,m)=>a+m.notes.length, 0);
+    const pub = s.is_public ? '<span class="lib-pub-badge">公开</span>' : '';
+    return `<div class="lib-item${s.id===activeId?' active':''}" onclick="openScore('${s.id}')">
+      <button class="lib-del" onclick="askDelete('${s.id}',event)">×</button>
+      <div class="lib-item-t">${esc(s.title)||'未命名'}${pub}</div>
+      <div class="lib-item-m">${s.key}·${s.time_sig}·${nc}音·${ds}</div>
+    </div>`;
+  }).join('');
+}
+
+async function newScore() {
+  if (!currentUser) return;
+  const newS = {user_id:currentUser.id, title:'新建乐谱', composer:'', key:'C', time_sig:'4/4', tempo:80, measures:[{notes:[],linebreak:false}], is_public:false};
+  const { data, error } = await sb.from('scores').insert(newS).select().single();
+  if (error) { toast('创建失败'); return; }
+  myScores.unshift(data);
+  renderLib();
+  openScore(data.id);
+  toast('新建乐谱');
+}
+
+function openScore(id) {
+  const s = myScores.find(x=>x.id===id);
+  if (!s) return;
+  activeId = id;
+  score = JSON.parse(JSON.stringify(s));
+  // normalize time_sig field name
+  if (score.time_sig && !score.timeSig) score.timeSig = score.time_sig;
+  cursor={m:0,n:0}; dirty=false;
+  document.getElementById('toolbar').style.display='';
+  document.getElementById('keySelect').value=score.key;
+  document.getElementById('timeSig').value=score.timeSig||score.time_sig||'4/4';
+  document.getElementById('tempoSlider').value=score.tempo;
+  document.getElementById('tempoVal').textContent=score.tempo;
+  const shareBtn = document.getElementById('shareBtn');
+  shareBtn.textContent = score.is_public ? '取消分享' : '分享到广场';
+  shareBtn.className = 'btn' + (score.is_public?' on':'');
+  renderScore(); renderLib();
+  setStatus('已打开：'+score.title); setSaveSt('已保存');
+}
+
+async function saveScore() {
+  if (!score||!currentUser) return;
+  score.updated_at = new Date().toISOString();
+  const payload = {title:score.title, composer:score.composer, key:score.key,
+    time_sig:score.timeSig||score.time_sig, tempo:score.tempo, measures:score.measures,
+    is_public:score.is_public, updated_at:score.updated_at};
+  const { error } = await sb.from('scores').update(payload).eq('id', activeId);
+  if (error) { toast('保存失败: '+error.message); return; }
+  const idx = myScores.findIndex(s=>s.id===activeId);
+  if (idx>=0) Object.assign(myScores[idx], payload, {id:activeId});
+  dirty=false; setSaveSt('已保存'); renderLib(); toast('已保存');
+}
+
+async function toggleShare() {
+  if (!score) return;
+  score.is_public = !score.is_public;
+  await saveScore();
+  const shareBtn = document.getElementById('shareBtn');
+  shareBtn.textContent = score.is_public ? '取消分享' : '分享到广场';
+  shareBtn.className = 'btn' + (score.is_public?' on':'');
+  toast(score.is_public ? '已发布到乐谱广场' : '已从广场撤回');
+}
+
+// ── Delete with confirm modal ──
+function askDelete(id, e) {
+  e.stopPropagation();
+  const s = myScores.find(x=>x.id===id);
+  pendingDeleteId = id;
+  document.getElementById('modalScoreName').textContent = '「'+(s?.title||'未命名')+'」';
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal() { pendingDeleteId=null; document.getElementById('modalOverlay').classList.remove('show'); }
+async function confirmDelete() {
+  const id = pendingDeleteId; closeModal(); if (!id) return;
+  const { error } = await sb.from('scores').delete().eq('id', id);
+  if (error) { toast('删除失败'); return; }
+  myScores = myScores.filter(x=>x.id!==id);
+  if (activeId===id) {
+    activeId=null; score=null; dirty=false;
+    document.getElementById('toolbar').style.display='none';
+    document.getElementById('scoreContent').innerHTML='<div class="no-score"><div class="no-score-icon">♪</div><div style="font-size:14px">选择左侧乐谱，或点「+ 新建」</div></div>';
+  }
+  renderLib(); toast('已删除');
+}
+
+// ══════════════════════════════════════════════
+// Score Render
+// ══════════════════════════════════════════════
+function renderScore() {
+  if (!score) return;
+  const c = document.getElementById('scoreContent');
+  const allEmpty = score.measures.every(m=>m.notes.length===0);
+  let html=`<div style="text-align:center;margin-bottom:10px">
+    <input class="score-title-input" placeholder="乐曲标题" value="${esc(score.title)}"
+      oninput="score.title=this.value;markDirty();renderLib()">
+    <br><input class="score-comp-input" placeholder="作曲 / 编曲" value="${esc(score.composer||'')}"
+      oninput="score.composer=this.value;markDirty()">
+  </div>
+  <div class="score-meta-row">
+    <span>1=${score.key}</span><span>${score.timeSig||score.time_sig}</span><span>♩=${score.tempo}</span>
+  </div>`;
+  if (allEmpty) {
+    html+='<div class="score-empty">使用下方键盘输入第一个音符<br>↵ 按钮可换行</div>';
+  } else {
+    const PER=4;
+    for(let s=0;s<score.measures.length;s+=PER){
+      html+='<div class="staff-line">';
+      for(let mi=s;mi<Math.min(s+PER,score.measures.length);mi++){
+        const m=score.measures[mi],isCur=mi===cursor.m;
+        html+=`<div class="measure${isCur?' cur-m':''}" onclick="clickMeasure(${mi},event)">
+          <span class="mnum">${mi+1}</span><div class="notes-row">`;
+        if(!m.notes.length){
+          if(isCur&&cursor.n===0) html+='<span class="cursor-end-beam"></span>';
+          html+='<span class="empty-m">空</span>';
+        } else {
+          m.notes.forEach((n,ni)=>{ html+=renderNote(n,mi,ni,isCur&&cursor.n===ni); });
+          if(isCur&&cursor.n===m.notes.length) html+='<span class="cursor-end-beam"></span>';
+        }
+        html+=`</div></div>`;
+      }
+      const lastMi=Math.min(s+PER,score.measures.length)-1;
+      if(score.measures[lastMi]?.linebreak){
+        html+=`<div class="linebreak-mark"><span style="cursor:pointer;padding:2px 5px;border-radius:3px"
+          onmouseover="this.style.color='#c0392b'" onmouseout="this.style.color=''"
+          onclick="removeLinebreak(${lastMi})">↵×</span></div>`;
+      }
+      html+='</div>';
+    }
+  }
+  c.innerHTML=html;
+}
+
+function renderNote(n,mi,ni,cursorBefore){
+  const acc=n.acc===1?'#':n.acc===-1?'b':'';
+  const isRest=n.num==='0';
+  let tD='',bD='';
+  if(n.octave>0)for(let i=0;i<n.octave;i++)tD+='<div class="odot"></div>';
+  if(n.octave<0)for(let i=0;i<-n.octave;i++)bD+='<div class="odot"></div>';
+  let ul='';
+  if(n.dur==='e')ul='<div class="nul"></div>';
+  if(n.dur==='s')ul='<div class="nul"></div><div class="nul"></div>';
+  return `<div class="note-cell${cursorBefore?' cursor-before':''}" onclick="clickNote(event,${mi},${ni})">
+    ${n.tie?'<span class="tiemark">⌢</span>':''}
+    <div class="nc-inner">
+      <div class="ndots-t">${tD}</div>
+      <div class="nnum${isRest?' rest':''}">${acc}${isRest?'—':n.num}${n.aug?'<span class="augdot"></span>':''}</div>
+      <div class="nul-wrap">${ul}</div>
+      <div class="ndots-b">${bD}</div>
+    </div>
+  </div>`;
+}
+
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
+
+// ══════════════════════════════════════════════
+// Edit ops
+// ══════════════════════════════════════════════
+function clickNote(e,mi,ni){e.stopPropagation();const rect=e.currentTarget.getBoundingClientRect();moveCursorTo(mi,e.clientX<rect.left+rect.width/2?ni:ni+1);}
+function clickMeasure(mi,e){if(e.target.classList.contains('note-cell')||e.target.closest('.note-cell'))return;moveCursorTo(mi,score.measures[mi].notes.length);}
+function moveCursorTo(mi,ni){cursor.m=mi;cursor.n=ni;renderScore();}
+function ins(num){if(!score)return;score.measures[cursor.m].notes.splice(cursor.n,0,{num,dur:curDur,octave:curOct,aug:curAug,tie:false,acc:curAcc});cursor.n++;markDirty();renderScore();}
+function insBar(){if(!score)return;const m=score.measures[cursor.m];const after=m.notes.splice(cursor.n);const lb=m.linebreak;m.linebreak=false;score.measures.splice(cursor.m+1,0,{notes:after,linebreak:lb});cursor.m++;cursor.n=0;markDirty();renderScore();}
+function insLineBreak(){if(!score)return;const m=score.measures[cursor.m];if(cursor.n<m.notes.length)insBar();const prev=cursor.m-1;if(prev>=0)score.measures[prev].linebreak=true;markDirty();renderScore();}
+function removeLinebreak(mi){if(!score)return;score.measures[mi].linebreak=false;markDirty();renderScore();}
+function delSel(){if(!score)return;const m=score.measures[cursor.m];if(cursor.n>0){m.notes.splice(cursor.n-1,1);cursor.n--;markDirty();renderScore();}else if(cursor.m>0){const prev=score.measures[cursor.m-1];const pos=prev.notes.length;prev.notes=prev.notes.concat(m.notes);prev.linebreak=m.linebreak;score.measures.splice(cursor.m,1);cursor.m--;cursor.n=pos;markDirty();renderScore();}}
+function delForward(){if(!score)return;const m=score.measures[cursor.m];if(cursor.n<m.notes.length){m.notes.splice(cursor.n,1);markDirty();renderScore();}else if(cursor.m<score.measures.length-1){const next=score.measures[cursor.m+1];m.notes=m.notes.concat(next.notes);m.linebreak=next.linebreak;score.measures.splice(cursor.m+1,1);markDirty();renderScore();}}
+function moveCursorLeft(){if(!score)return;if(cursor.n>0)cursor.n--;else if(cursor.m>0){cursor.m--;cursor.n=score.measures[cursor.m].notes.length;}renderScore();}
+function moveCursorRight(){if(!score)return;const m=score.measures[cursor.m];if(cursor.n<m.notes.length)cursor.n++;else if(cursor.m<score.measures.length-1){cursor.m++;cursor.n=0;}renderScore();}
+function addMeasure(){if(!score)return;score.measures.push({notes:[],linebreak:false});cursor.m=score.measures.length-1;cursor.n=0;markDirty();renderScore();}
+function deleteLast(){if(!score||score.measures.length<=1)return;score.measures.pop();cursor.m=Math.min(cursor.m,score.measures.length-1);cursor.n=Math.min(cursor.n,score.measures[cursor.m].notes.length);markDirty();renderScore();}
+function adjOct(d){curOct=Math.max(-2,Math.min(2,curOct+d));document.getElementById('octDisp').textContent=['超低','低','中','高','超高'][curOct+2];}
+function togAug(){curAug=!curAug;document.getElementById('augBtn').className='btn'+(curAug?' on':'');}
+function togAcc(v){curAcc=curAcc===v?0:v;document.getElementById('shBtn').className='btn'+(curAcc===1?' on':'');document.getElementById('flBtn').className='btn'+(curAcc===-1?' on':'');}
+function setKey(k){if(score){score.key=k;markDirty();renderScore();}}
+function setTimeSig(v){if(score){score.timeSig=v;markDirty();renderScore();}}
+function setTempo(v){if(score){score.tempo=parseInt(v);document.getElementById('tempoVal').textContent=v;markDirty();}}
+function markDirty(){dirty=true;setSaveSt('未保存 ●');}
+function setSaveSt(s){document.getElementById('saveSt').textContent=s;}
+function setStatus(m){document.getElementById('statusMsg').textContent=m;}
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(!score)return;
+  const tag=e.target.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
+  if('1234567'.includes(e.key)){ins(e.key);e.preventDefault();}
+  else if(e.key==='0'){ins('0');e.preventDefault();}
+  else if(e.key==='ArrowUp'){adjOct(1);e.preventDefault();}
+  else if(e.key==='ArrowDown'){adjOct(-1);e.preventDefault();}
+  else if(e.key==='ArrowLeft'){moveCursorLeft();e.preventDefault();}
+  else if(e.key==='ArrowRight'){moveCursorRight();e.preventDefault();}
+  else if(e.key==='Backspace'){delSel();e.preventDefault();}
+  else if(e.key==='Delete'){delForward();e.preventDefault();}
+  else if(e.key===' '){togglePlay();e.preventDefault();}
+  else if(e.key==='Enter'&&!e.shiftKey){insBar();e.preventDefault();}
+  else if(e.key==='Enter'&&e.shiftKey){insLineBreak();e.preventDefault();}
+  else if((e.ctrlKey||e.metaKey)&&e.key==='s'){saveScore();e.preventDefault();}
+});
+
+// ══════════════════════════════════════════════
+// Playback
+// ══════════════════════════════════════════════
+function noteFreq(n,key){if(n.num==='0')return 0;const i=parseInt(n.num)-1;const st=(SCALE[key]||SCALE.C)[i]+n.octave*12+n.acc;return 261.63*Math.pow(2,st/12);}
+function getACtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playMeasures(measures,key,tempo,onEnd){
+  const ctx=getACtx(),bd=60/tempo,dm={w:4,h:2,q:1,e:.5,s:.25};
+  let t=ctx.currentTime+.1;
+  measures.forEach(m=>m.notes.forEach(n=>{
+    let beats=(dm[n.dur]||1)*(n.aug?1.5:1),d=beats*bd,f=noteFreq(n,key);
+    if(f>0){const osc=ctx.createOscillator(),g=ctx.createGain();osc.connect(g);g.connect(ctx.destination);osc.type='triangle';osc.frequency.value=f;g.gain.setValueAtTime(.4,t);g.gain.exponentialRampToValueAtTime(.001,t+d*.88);osc.start(t);osc.stop(t+d);}
+    t+=d;
+  }));
+  return setTimeout(onEnd,(t-ctx.currentTime)*1000);
+}
+function togglePlay(){
+  if(!score)return;
+  if(playing){stopPlay();return;}
+  playing=true;
+  const b=document.getElementById('playBtn');b.textContent='■ 停止';b.style.background='#c0392b';b.style.borderColor='#c0392b';
+  playTimer=playMeasures(score.measures,score.key,score.tempo,()=>{playing=false;resetPlay();});
+}
+function stopPlay(){playing=false;if(playTimer)clearTimeout(playTimer);if(audioCtx){audioCtx.close();audioCtx=null;}resetPlay();}
+function resetPlay(){const b=document.getElementById('playBtn');if(!b)return;b.textContent='▶ 播放';b.className='btn play';b.style.background='';b.style.borderColor='';}
+
+// ══════════════════════════════════════════════
+// Plaza
+// ══════════════════════════════════════════════
+let plazaSearchTimer=null;
+function debounceSearch(){clearTimeout(plazaSearchTimer);plazaSearchTimer=setTimeout(loadPlaza,400);}
+
+async function loadPlaza() {
+  const q = document.getElementById('plazaSearch').value.trim();
+  const grid = document.getElementById('plazaGrid');
+  grid.innerHTML = '<div class="plaza-empty"><div class="spinner"></div></div>';
+
+  let query = sb.from('public_scores')
+    .select('id,title,composer,key,time_sig,tempo,measures,play_count,updated_at,user_id,author,fav_count')
+    .order('updated_at', {ascending:false})
+    .limit(60);
+
+  if (q) query = query.or(`title.ilike.%${q}%,composer.ilike.%${q}%,author.ilike.%${q}%`);
+
+  const { data, error } = await query;
+  if (error) { grid.innerHTML=`<div class="plaza-empty">加载失败: ${error.message}</div>`; return; }
+  plazaScores = data || [];
+  renderPlaza();
+}
+
+function renderPlaza() {
+  const grid = document.getElementById('plazaGrid');
+  if (!plazaScores.length) { grid.innerHTML='<div class="plaza-empty">暂无乐谱，快去编辑器发布第一首吧！</div>'; return; }
+  grid.innerHTML = plazaScores.map(s => {
+    const isFav = myFavIds.has(s.id);
+    const isOwn = currentUser && s.user_id === currentUser.id;
+    const d = new Date(s.updated_at);
+    const ds = `${d.getMonth()+1}/${d.getDate()}`;
+    return `<div class="plaza-card" onclick="openPreview('${s.id}')">
+      <button class="fav-btn${isFav?' active':''}" onclick="toggleFav('${s.id}',event)" title="${isFav?'取消收藏':'收藏'}">${isFav?'♥':'♡'}</button>
+      <div class="plaza-card-title" title="${esc(s.title)}">${esc(s.title)||'未命名'}</div>
+      <div class="plaza-card-composer">${esc(s.composer)||'—'}</div>
+      <div class="plaza-card-meta">
+        <span class="plaza-card-author">by ${esc(s.author)}${isOwn?' (我)':''}</span>
+        <span>1=${s.key}</span>
+        <span>♥ ${s.fav_count}</span>
+        <span>${ds}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function toggleFav(scoreId, e) {
+  e.stopPropagation();
+  if (!currentUser) { toast('请先登录'); return; }
+  const isFav = myFavIds.has(scoreId);
+  if (isFav) {
+    await sb.from('favorites').delete().eq('user_id',currentUser.id).eq('score_id',scoreId);
+    myFavIds.delete(scoreId);
+    toast('已取消收藏');
+  } else {
+    await sb.from('favorites').insert({user_id:currentUser.id, score_id:scoreId});
+    myFavIds.add(scoreId);
+    toast('已收藏');
+  }
+  // update fav_count locally
+  const s = plazaScores.find(x=>x.id===scoreId);
+  if (s) s.fav_count = parseInt(s.fav_count)+(isFav?-1:1);
+  renderPlaza();
+}
+
+// ── Preview modal ──
+function openPreview(scoreId) {
+  const s = plazaScores.find(x=>x.id===scoreId);
+  if (!s) return;
+  previewScore = s;
+  document.getElementById('previewTitle').textContent = (s.title||'未命名') + ' — ' + (s.author||'');
+  // render readonly score
+  const container = document.getElementById('previewScore');
+  container.innerHTML = renderReadonlyScore(s);
+  const isOwn = currentUser && s.user_id === currentUser.id;
+  const isFav = myFavIds.has(s.id);
+  const forkBtn = document.getElementById('forkBtn');
+  if (isOwn) { forkBtn.style.display='none'; }
+  else { forkBtn.style.display=''; forkBtn.textContent = isFav?'取消收藏':'收藏此乐谱'; forkBtn.className='btn '+(isFav?'':'primary'); }
+  document.getElementById('previewOverlay').classList.add('show');
+  // increment play_count
+  sb.from('scores').update({play_count: (s.play_count||0)+1}).eq('id',scoreId);
+}
+
+function closePreview() {
+  document.getElementById('previewOverlay').classList.remove('show');
+  stopPreviewPlay();
+}
+
+function renderReadonlyScore(s) {
+  const meta = `<div style="text-align:center;margin-bottom:10px">
+    <div style="font-size:20px;font-weight:700">${esc(s.title||'未命名')}</div>
+    <div style="font-size:13px;color:var(--ink2);margin-top:4px">${esc(s.composer||'')}</div>
+  </div>
+  <div class="score-meta-row"><span>1=${s.key}</span><span>${s.time_sig}</span><span>♩=${s.tempo}</span></div>`;
+
+  let html = meta;
+  const measures = s.measures || [];
+  if (!measures.length || measures.every(m=>m.notes.length===0)) {
+    return html + '<div class="score-empty">（空谱）</div>';
+  }
+  const PER=4;
+  for(let st=0;st<measures.length;st+=PER){
+    html+='<div class="staff-line">';
+    for(let mi=st;mi<Math.min(st+PER,measures.length);mi++){
+      const m=measures[mi];
+      html+=`<div class="measure"><span class="mnum">${mi+1}</span><div class="notes-row">`;
+      if(!m.notes.length){ html+='<span class="empty-m">空</span>'; }
+      else m.notes.forEach(n=>{
+        const acc=n.acc===1?'#':n.acc===-1?'b':'';
+        const isRest=n.num==='0';
+        let tD='',bD='';
+        if(n.octave>0)for(let i=0;i<n.octave;i++)tD+='<div class="odot"></div>';
+        if(n.octave<0)for(let i=0;i<-n.octave;i++)bD+='<div class="odot"></div>';
+        let ul='';
+        if(n.dur==='e')ul='<div class="nul"></div>';
+        if(n.dur==='s')ul='<div class="nul"></div><div class="nul"></div>';
+        html+=`<div class="note-cell" style="cursor:default"><div class="nc-inner">
+          <div class="ndots-t">${tD}</div>
+          <div class="nnum${isRest?' rest':''}">${acc}${isRest?'—':n.num}${n.aug?'<span class="augdot"></span>':''}</div>
+          <div class="nul-wrap">${ul}</div>
+          <div class="ndots-b">${bD}</div>
+        </div></div>`;
+      });
+      html+=`</div></div>`;
+    }
+    html+='</div>';
+  }
+  return html;
+}
+
+let previewPlaying=false,previewPlayTimer=null;
+function playPreview(){
+  if(!previewScore)return;
+  if(previewPlaying){stopPreviewPlay();return;}
+  previewPlaying=true;
+  const b=document.getElementById('previewPlayBtn');b.textContent='■ 停止';b.style.background='#c0392b';b.style.borderColor='#c0392b';
+  previewPlayTimer=playMeasures(previewScore.measures,previewScore.key,previewScore.tempo,()=>{previewPlaying=false;resetPreviewPlay();});
+}
+function stopPreviewPlay(){previewPlaying=false;if(previewPlayTimer)clearTimeout(previewPlayTimer);if(audioCtx){audioCtx.close();audioCtx=null;}resetPreviewPlay();}
+function resetPreviewPlay(){const b=document.getElementById('previewPlayBtn');if(b){b.textContent='▶ 播放';b.className='btn play';b.style.background='';b.style.borderColor='';}}
+
+async function forkScore() {
+  if(!previewScore||!currentUser)return;
+  const isFav = myFavIds.has(previewScore.id);
+  await toggleFav(previewScore.id, {stopPropagation:()=>{}});
+  const forkBtn=document.getElementById('forkBtn');
+  const nowFav=myFavIds.has(previewScore.id);
+  forkBtn.textContent=nowFav?'取消收藏':'收藏此乐谱';
+  forkBtn.className='btn '+(nowFav?'':'primary');
+}
+
+// ══════════════════════════════════════════════
+// Example
+// ══════════════════════════════════════════════
+function loadExample(){
+  if(!score)return;
+  const mk=(num,dur,oct)=>({num,dur,octave:oct,aug:false,tie:false,acc:0});
+  score.title='生日快乐';score.composer='传统';
+  score.measures=[
+    {notes:[mk('5','e',0),mk('5','e',0),mk('6','q',0),mk('5','q',0)],linebreak:false},
+    {notes:[mk('1','q',1),mk('7','h',0)],linebreak:true},
+    {notes:[mk('5','e',0),mk('5','e',0),mk('6','q',0),mk('5','q',0)],linebreak:false},
+    {notes:[mk('2','q',1),mk('1','h',1)],linebreak:true},
+    {notes:[mk('5','e',0),mk('5','e',0),mk('5','q',1),mk('3','q',1)],linebreak:false},
+    {notes:[mk('6','e',1),mk('6','e',1),mk('4','q',1),mk('2','q',1)],linebreak:true},
+    {notes:[mk('7','e',0),mk('7','e',0),mk('6','q',1),mk('4','q',1)],linebreak:false},
+    {notes:[mk('5','h',1),mk('0','h',0)],linebreak:false},
+  ];
+  document.getElementById('keySelect').value='C';
+  cursor={m:0,n:0};markDirty();renderScore();toast('已加载示例，记得保存');
+}
+
+// ══════════════════════════════════════════════
+// Build toolbar controls
+// ══════════════════════════════════════════════
+function buildControls(){
+  const kg=document.getElementById('keyGrid');
+  ['1','2','3','4','5','6','7'].forEach(n=>{
+    const b=document.createElement('button');b.className='kbtn';b.textContent=n;b.onclick=()=>ins(n);kg.appendChild(b);
+  });
+  const db=document.getElementById('durBtns');
+  DURS.forEach(d=>{
+    const b=document.createElement('button');b.className='dur-btn'+(d.id===curDur?' on':'');b.id='dur_'+d.id;b.textContent=d.label;
+    b.onclick=()=>{curDur=d.id;DURS.forEach(x=>{const el=document.getElementById('dur_'+x.id);if(el)el.className='dur-btn'+(x.id===curDur?' on':'');});};
+    db.appendChild(b);
+  });
+}
+
+let toastTimer;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2400);}
+
+buildControls();
+document.getElementById('octDisp').textContent='中';
+initAuth();
+</script>
+</body>
+</html>
