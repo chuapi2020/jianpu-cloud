@@ -696,7 +696,18 @@ function clickMeasure(mi,e){if(e.target.classList.contains('note-cell')||e.targe
 function moveCursorTo(mi,ni){cursor.m=mi;cursor.n=ni;renderScore();}
 function ins(num){if(!score)return;score.measures[cursor.m].notes.splice(cursor.n,0,{num,dur:curDur,octave:curOct,aug:curAug,tie:false,acc:curAcc});cursor.n++;markDirty();renderScore();}
 function insBar(){if(!score)return;const m=score.measures[cursor.m];const after=m.notes.splice(cursor.n);const lb=m.linebreak;m.linebreak=false;score.measures.splice(cursor.m+1,0,{notes:after,linebreak:lb});cursor.m++;cursor.n=0;markDirty();renderScore();}
-function insLineBreak(){if(!score)return;const m=score.measures[cursor.m];if(cursor.n<m.notes.length)insBar();const prev=cursor.m-1;if(prev>=0)score.measures[prev].linebreak=true;markDirty();renderScore();}
+function insLineBreak(){
+  if(!score)return;
+  const m=score.measures[cursor.m];
+  if(cursor.n<m.notes.length){
+    const targetMi=cursor.m;
+    insBar();
+    score.measures[targetMi].linebreak=true;
+  } else {
+    score.measures[cursor.m].linebreak=true;
+  }
+  markDirty();renderScore();
+}
 function removeLinebreak(mi){if(!score)return;score.measures[mi].linebreak=false;markDirty();renderScore();}
 function delSel(){if(!score)return;const m=score.measures[cursor.m];if(cursor.n>0){m.notes.splice(cursor.n-1,1);cursor.n--;markDirty();renderScore();}else if(cursor.m>0){const prev=score.measures[cursor.m-1];const pos=prev.notes.length;prev.notes=prev.notes.concat(m.notes);prev.linebreak=m.linebreak;score.measures.splice(cursor.m,1);cursor.m--;cursor.n=pos;markDirty();renderScore();}}
 function delForward(){if(!score)return;const m=score.measures[cursor.m];if(cursor.n<m.notes.length){m.notes.splice(cursor.n,1);markDirty();renderScore();}else if(cursor.m<score.measures.length-1){const next=score.measures[cursor.m+1];m.notes=m.notes.concat(next.notes);m.linebreak=next.linebreak;score.measures.splice(cursor.m+1,1);markDirty();renderScore();}}
