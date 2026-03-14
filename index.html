@@ -630,10 +630,18 @@ function renderScore() {
   if (allEmpty) {
     html+='<div class="score-empty">使用下方键盘输入第一个音符<br>↵ 按钮可换行</div>';
   } else {
-    const PER=4;
-    for(let s=0;s<score.measures.length;s+=PER){
+    // Split measures into rows using linebreak flags
+    const rows = [];
+    let currentRow = [];
+    score.measures.forEach((m, mi) => {
+      currentRow.push(mi);
+      if (m.linebreak) { rows.push(currentRow); currentRow = []; }
+    });
+    if (currentRow.length) rows.push(currentRow);
+
+    rows.forEach(rowMeasures => {
       html+='<div class="staff-line">';
-      for(let mi=s;mi<Math.min(s+PER,score.measures.length);mi++){
+      rowMeasures.forEach(mi => {
         const m=score.measures[mi],isCur=mi===cursor.m;
         html+=`<div class="measure${isCur?' cur-m':''}" onclick="clickMeasure(${mi},event)">
           <span class="mnum">${mi+1}</span><div class="notes-row">`;
@@ -645,15 +653,15 @@ function renderScore() {
           if(isCur&&cursor.n===m.notes.length) html+='<span class="cursor-end-beam"></span>';
         }
         html+=`</div></div>`;
-      }
-      const lastMi=Math.min(s+PER,score.measures.length)-1;
+      });
+      const lastMi = rowMeasures[rowMeasures.length-1];
       if(score.measures[lastMi]?.linebreak){
         html+=`<div class="linebreak-mark"><span style="cursor:pointer;padding:2px 5px;border-radius:3px"
           onmouseover="this.style.color='#c0392b'" onmouseout="this.style.color=''"
           onclick="removeLinebreak(${lastMi})">↵×</span></div>`;
       }
       html+='</div>';
-    }
+    });
   }
   c.innerHTML=html;
 }
