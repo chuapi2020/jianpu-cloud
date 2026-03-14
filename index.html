@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- ══ SEO: Primary meta ══ -->
-<title>简谱云 JianpuCloud — 在线简谱编辑与分享平台 | Online Numbered Notation Editor</title>
-<meta name="description" content="简谱云是一款免费的在线简谱编辑器，支持创作、分享和收藏简谱乐谱。JianpuCloud is a free online numbered musical notation (jianpu) editor for composing, sharing and collecting sheet music.">
+<title>简谱寨 JianpuCloud — 在线简谱编辑与分享平台 | Online Numbered Notation Editor</title>
+<meta name="description" content="简谱寨是一款免费的在线简谱编辑器，支持创作、分享和收藏简谱乐谱。JianpuCloud is a free online numbered musical notation (jianpu) editor for composing, sharing and collecting sheet music.">
 <meta name="keywords" content="简谱,简谱编辑器,在线简谱,乐谱分享,数字谱,jianpu,numbered notation,sheet music editor,music score,online music editor">
 <meta name="author" content="JianpuCloud">
 <meta name="robots" content="index, follow">
@@ -20,8 +20,8 @@
 
 <!-- ══ SEO: Open Graph (Facebook / WeChat) ══ -->
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="简谱云 JianpuCloud">
-<meta property="og:title" content="简谱云 JianpuCloud — 在线简谱编辑与分享平台">
+<meta property="og:site_name" content="简谱寨 JianpuCloud">
+<meta property="og:title" content="简谱寨 JianpuCloud — 在线简谱编辑与分享平台">
 <meta property="og:description" content="免费在线简谱编辑器，创作、分享和收藏简谱乐谱。Free online jianpu (numbered notation) editor — compose, share and collect sheet music.">
 <meta property="og:url" content="https://jianpu-cloud.vercel.app/">
 <meta property="og:locale" content="zh_CN">
@@ -29,7 +29,7 @@
 
 <!-- ══ SEO: Twitter Card ══ -->
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="简谱云 JianpuCloud — Online Jianpu Editor">
+<meta name="twitter:title" content="简谱寨 JianpuCloud — Online Jianpu Editor">
 <meta name="twitter:description" content="Free online numbered notation (jianpu) editor. Compose, share and collect sheet music.">
 
 <!-- ══ SEO: Structured data — WebApplication ══ -->
@@ -37,7 +37,7 @@
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "简谱云 JianpuCloud",
+  "name": "简谱寨 JianpuCloud",
   "url": "https://jianpu-cloud.vercel.app/",
   "description": "Free online numbered musical notation (jianpu) editor for composing, sharing and collecting sheet music.",
   "applicationCategory": "MusicApplication",
@@ -61,7 +61,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<noscript><style>body::before{content:"请启用 JavaScript 以使用简谱云。Please enable JavaScript to use JianpuCloud.";display:block;padding:40px;text-align:center;font-family:sans-serif;}</style></noscript>
+<noscript><style>body::before{content:"请启用 JavaScript 以使用简谱寨。Please enable JavaScript to use JianpuCloud.";display:block;padding:40px;text-align:center;font-family:sans-serif;}</style></noscript>
 <style>
 /* ── Reset & Variables ── */
 *{box-sizing:border-box;margin:0;padding:0}
@@ -351,7 +351,7 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
   <div class="header" id="mainHeader" style="display:none">
     <!-- FIX F1: Mobile drawer toggle -->
     <button class="mob-lib-toggle" id="mobLibToggle" onclick="toggleMobileLib()" aria-label="切换乐谱列表">☰</button>
-    <div class="logo">简<span>谱</span>云</div>
+    <div class="logo">简<span>谱</span>寨</div>
     <div class="nav-tab active" onclick="switchView('editor')" id="navEditor" data-i18n="nav.myScores">我的乐谱</div>
     <div class="nav-tab" onclick="switchView('favorites')" id="navFavorites" data-i18n="nav.myFavs">我的收藏</div>
     <div class="nav-tab" onclick="switchView('plaza')" id="navPlaza" data-i18n="nav.plaza">乐谱广场</div>
@@ -371,7 +371,7 @@ body{font-family:'Noto Serif SC',serif;background:var(--paper);color:var(--ink);
   <!-- ══ AUTH VIEW ══ -->
   <div class="view auth-view active" id="viewAuth">
     <div class="auth-card">
-      <div class="auth-logo">简<span>谱</span>云</div>
+      <div class="auth-logo">简<span>谱</span>寨</div>
       <div class="auth-sub" data-i18n="auth.sub">在线简谱编辑与分享平台</div>
       <div class="auth-tabs">
         <div class="auth-tab active" onclick="switchAuthTab('login')" id="tabLogin" data-i18n="auth.login">登录</div>
